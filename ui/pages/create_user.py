@@ -2,10 +2,10 @@ import streamlit as st
 from sqlalchemy.exc import IntegrityError
 
 from backend import schemas
-from ui import session
+from ui.server_connections import authentication, database
 
-session.authorize()
-db = session.init_session_and_get_database()
+authentication.authorize()
+db = database.init_session_and_get_database()
 st.title("Create New User")
 
 user_name = st.text_input("user name: ")

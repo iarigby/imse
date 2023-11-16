@@ -1,8 +1,8 @@
 import streamlit as st
-from ui import session
+from ui.server_connections import authentication, database
 
-session.authorize()
-db = session.init_session_and_get_database()
+authentication.authorize()
+db = database.init_session_and_get_database()
 
 
 st.title("View Users")
