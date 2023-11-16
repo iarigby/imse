@@ -25,8 +25,8 @@ class Ticket(Base):
     _id: Mapped[uuid.UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
     concert_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("concert._id"))
     concert: Mapped["Concert"] = relationship(back_populates="tickets")
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("ticket._id"))
-    user: Mapped[uuid.UUID] = relationship(back_populates="tickets")
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user._id"))
+    user: Mapped["User"] = relationship(back_populates="tickets")
 
     @property
     def id(self):
