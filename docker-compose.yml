@@ -28,7 +28,7 @@ services:
 # https://github.com/testdrivenio/flask-celery/blob/master/docker-compose.yml
   db_worker:
     build: .
-    command: celery --app backend.worker worker --loglevel=infolery --app backend.worker worker --loglevel=info
+    command: celery worker --app backend.worker --loglevel=infolery --app backend.worker worker --loglevel=info
     volumes:
       - .:/usr/src/app
     depends_on:
