@@ -16,6 +16,7 @@ CELERY_BROKER_URL=redis://localhost:6379/0
 ### Setup
 Prerequisites
 
+- python 3.11
 - poetry
 - docker
 - postgresql (`brew install postgresql`)

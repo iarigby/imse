@@ -8,8 +8,8 @@ from backend import schemas
 
 
 # SQLALCHEMY_DATABASE_URL = "sqlite:///./sql_app.db"
-# SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@postgres_server/backend"
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@localhost/backend"
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@postgres_server/backend"
+# SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@localhost/backend"
 
 
 class SqlDatabase(backend.database.Database):

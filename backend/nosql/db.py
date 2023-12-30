@@ -1,4 +1,5 @@
 from pymongo.mongo_client import MongoClient
+import os
 
 import backend.database
 from backend import schemas
@@ -6,7 +7,7 @@ from backend import schemas
 
 class MongoDatabase(backend.database.Database):
     def __init__(self):
-        uri = "mongodb://localhost:27017/admin"
+        uri = os.environ.get('MONGO_URL', "mongodb://mongodb:27017/admin")
         self.client = MongoClient(uri)
         self.client.admin.command('ping')
         self.db = self.client.imse

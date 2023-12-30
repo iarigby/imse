@@ -3,8 +3,8 @@ services:
     image: mongo:6-jammy
     ports:
       - '27017:27017'
-#    volumes:
-#      - db_data:/data/db
+    volumes:
+      - mongo_data:/data/db
 
   postgres_server:
     container_name: db_container
@@ -14,7 +14,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: backend
     volumes:
-      - db:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     restart: unless-stopped
@@ -28,30 +28,26 @@ services:
 # https://github.com/testdrivenio/flask-celery/blob/master/docker-compose.yml
   db_worker:
     build: .
-    command: celery --app backend.worker worker --loglevel=info
+    command: celery --app backend.worker worker --loglevel=infolery --app backend.worker worker --loglevel=info
     volumes:
       - .:/usr/src/app
-    environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
       - redis
       - mongodb
 
-#  ui:
-#    build: .
-#    command: streamlit run ui/dashboard.py --server.address="0.0.0.0"
-#    volumes:
-#      - .:/usr/src/app
-#    ports:
-#      - 8080:8501
-#    environment:
-#      - CELERY_BROKER_URL=redis://redis:6379/0
-#      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-#    depends_on:
-#      - redis
-#      - mongodb
+  ui:
+    build: .
+    command: streamlit run ui/dashboard.py --server.address="0.0.0.0"
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - 8501:8501
+    depends_on:
+      - redis
+      - mongodb
+      - db_worker
+      - postgres_server
 
 volumes:
-  db_data:
-  db:
+  mongo_data:
+  postgres_data:
