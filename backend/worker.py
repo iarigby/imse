@@ -6,9 +6,13 @@ from celery.result import AsyncResult
 from celery import Celery
 from redis import Redis
 
+
+REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
+
+
 app = Celery('tasks',
-             broker=os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/0'),
-             backend=os.environ.get('CELERY_RESULT_BACKEND', 'redis://redis:6379/0'))
+             broker=os.environ.get('CELERY_BROKER_URL', f'redis://{REDIS_HOST}:6379/0'),
+             backend=os.environ.get('CELERY_RESULT_BACKEND', f'redis://{REDIS_HOST}:6379/0'))
 
 
 def get_migration_task():
@@ -24,7 +28,7 @@ def get_migration_task():
         migration_task = next(task for task in active_tasks if 'migrate' in task["type"])
         migration_task_id = migration_task["id"]
     except StopIteration:
-        r = Redis(host=os.environ.get('REDIS_HOST', 'redis'))
+        r = Redis(host=REDIS_HOST)
         migration_task_id = r.get('migration_task_id')
 
     if migration_task_id is None:
@@ -40,12 +44,12 @@ def migrate():
 
 
 def launch_migrate():
-    r = Redis(host=os.environ.get('REDIS_HOST', 'redis'))
+    r = Redis(REDIS_HOST)
     task = migrate.delay()
     r.set('migration_task_id', task.id)
     return task
 
 
 def clear_migrate_info():
-    r = Redis(host=os.environ.get('REDIS_HOST', 'redis'))
+    r = Redis(REDIS_HOST)
     r.flushdb()

@@ -1,3 +1,5 @@
+import os
+
 import sqlalchemy.exc
 from sqlalchemy import create_engine, StaticPool
 from sqlalchemy.orm import sessionmaker
@@ -7,9 +9,7 @@ from backend.sql import models
 from backend import schemas
 
 
-# SQLALCHEMY_DATABASE_URL = "sqlite:///./sql_app.db"
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@postgres_server/backend"
-# SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@localhost/backend"
+SQLALCHEMY_DATABASE_URL = os.environ.get("SQLALCHEMY_DATABASE_URL", "postgresql://postgres:postgres@localhost/backend")
 
 
 class SqlDatabase(backend.database.Database):

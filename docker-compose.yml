@@ -25,12 +25,15 @@ services:
     ports:
       - '6379:6379'
 
-# https://github.com/testdrivenio/flask-celery/blob/master/docker-compose.yml
+  # https://github.com/testdrivenio/flask-celery/blob/master/docker-compose.yml
   db_worker:
     build: .
-    command: celery worker --app backend.worker --loglevel=infolery --app backend.worker worker --loglevel=info
+    command: celery --app backend.worker worker --loglevel=info --uid celery
+    environment:
+      - "SQLALCHEMY_DATABASE_URL=postgresql://postgres:postgres@postgres_server/backend"
+      - "REDIS_HOST=redis"
     volumes:
-      - .:/usr/src/app
+      - ./:/usr/src/app
     depends_on:
       - redis
       - mongodb
@@ -39,7 +42,10 @@ services:
     build: .
     command: streamlit run ui/dashboard.py --server.address="0.0.0.0"
     volumes:
-      - .:/usr/src/app
+      - ./:/usr/src/app
+    environment:
+      - "SQLALCHEMY_DATABASE_URL=postgresql://postgres:postgres@postgres_server/backend"
+      - "REDIS_HOST=redis"
     ports:
       - 8501:8501
     depends_on:
@@ -48,6 +54,11 @@ services:
       - db_worker
       - postgres_server
 
+
 volumes:
   mongo_data:
   postgres_data:
+
+networks:
+  imse:
+

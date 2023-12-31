@@ -10,8 +10,9 @@ ENV PYTHONUNBUFFERED=1 \
     POETRY_NO_INTERACTION=1 \
     POETRY_CACHE_DIR=/opt/.cache/poetry_cache
 
-
 WORKDIR /usr/src/app
+
+RUN adduser --system --no-create-home celery
 
 RUN pip install "poetry==$POETRY_VERSION"
 RUN poetry config virtualenvs.create false

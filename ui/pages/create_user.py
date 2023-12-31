@@ -16,7 +16,7 @@ if st.button("add new user"):
     except IntegrityError as e:
         error = str(e)
         st.error("could not create new user. ")
-        if "UNIQUE" in error and "user.name" in error:
+        if ("UNIQUE" in error and "user.name" in error) or "errors.UniqueViolation" in error:
             st.error("name needs to be unique")
         else:
             st.error("unknown error" + error)
