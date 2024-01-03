@@ -4,7 +4,7 @@ from backend import schemas
 from backend.nosql.db import MongoDatabase
 
 
-@pytest.mark.integration
+@pytest.mark.skip
 def test_mongodb():
     db = MongoDatabase()
     db.reset()

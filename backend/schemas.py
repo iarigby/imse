@@ -1,31 +1,60 @@
-from pydantic import BaseModel
+import datetime
+import uuid
+from enum import Enum
+
+from pydantic import BaseModel, ConfigDict
 
 
 class NewUser(BaseModel):
     name: str
+    balance: int = 0
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class User(NewUser):
-    _id: int
+    id: uuid.UUID
 
 
-class Ticket(BaseModel):
-    _id: int
-
-    class Config:
-        from_attributes = True
+class TicketStatus(Enum):
+    BOOKED = 0
+    CANCELLED = 1
 
 
-class Concert(BaseModel):
-    _id: int
+class NewTicket(BaseModel):
+    purchase_date: datetime.datetime
+    status: TicketStatus
+    user_id: uuid.UUID
+    event_id: uuid.UUID
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class Ticket(NewTicket):
+    id: uuid.UUID
+
+
+class NewEvent(BaseModel):
     name: str
+    price: int = 0
+    venue_id: uuid.UUID
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
-class ConcertWithTickets(Concert):
+class Event(NewEvent):
+    id: uuid.UUID
+
+
+class EventWithTickets(Event):
     tickets: list[Ticket]
+
+
+class NewVenue(BaseModel):
+    name: str
+    city: str
+    capacity: int
+
+
+class Venue(NewVenue):
+    id: uuid.UUID

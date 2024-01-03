@@ -1,8 +1,11 @@
+import datetime
 import uuid
 from typing import List
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, Enum, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
+
+from backend import schemas
 
 
 class Base(DeclarativeBase):
@@ -14,6 +17,7 @@ class User(Base):
     _id: Mapped[uuid.UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(unique=True)
     tickets: Mapped[List["Ticket"]] = relationship(back_populates="user")
+    balance: Mapped[int]
 
     @property
     def id(self):
@@ -23,21 +27,41 @@ class User(Base):
 class Ticket(Base):
     __tablename__ = "ticket"
     _id: Mapped[uuid.UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
-    concert_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("concert._id"))
-    concert: Mapped["Concert"] = relationship(back_populates="tickets")
+    event_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("event._id"))
+    event: Mapped["Event"] = relationship(back_populates="tickets")
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user._id"))
     user: Mapped["User"] = relationship(back_populates="tickets")
+    purchase_date: Mapped[datetime.datetime]
+    status = Column(Enum(schemas.TicketStatus))
 
     @property
     def id(self):
         return self._id
 
 
-class Concert(Base):
-    __tablename__ = "concert"
+class Venue(Base):
+    __tablename__ = "venue"
     _id: Mapped[uuid.UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
-    tickets: Mapped[List["Ticket"]] = relationship(back_populates="concert")
+    name: Mapped[str]
+    city: Mapped[str]
+    capacity: Mapped[int]
+    events: Mapped[List["Event"]] = relationship(back_populates="venue")
 
     @property
     def id(self):
         return self._id
+
+
+class Event(Base):
+    __tablename__ = "event"
+    _id: Mapped[uuid.UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
+    name: Mapped[str]
+    tickets: Mapped[List["Ticket"]] = relationship(back_populates="event")
+    price: Mapped[int]
+    venue: Mapped["Venue"] = relationship(back_populates="events")
+    venue_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("venue._id"))
+
+    @property
+    def id(self):
+        return self._id
+
