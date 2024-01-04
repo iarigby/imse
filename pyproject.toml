@@ -19,6 +19,7 @@ celery = "^5.3.4"
 redis = "^5.0.1"
 psycopg2 = "^2.9.9"
 faker = "^22.0.0"
+pillow = "^10.2.0"
 
 
 [tool.poetry.group.dev.dependencies]
