@@ -1,6 +1,4 @@
-import datetime
-
-from backend import schemas
+from backend import generate
 from backend.sql.db import SqlDatabase
 from backend import services
 
@@ -11,10 +9,11 @@ SessionMaker = SqlDatabase.database(engine)
 def test_sqldb():
     SqlDatabase.reset(engine)
     with SqlDatabase.session(SessionMaker) as db:
-        db.add_user(schemas.NewUser(name="username"))
+        new_user = generate.user()
+        db.add_user(new_user)
         users = db.get_users()
         assert users[0].id is not None
-        assert users[0].name == "username"
+        assert users[0].first_name == new_user.first_name
 
 
 # Untested: user cannot buy ticket twice
@@ -22,15 +21,10 @@ def test_buy_ticket():
     SqlDatabase.reset(engine)
     with SqlDatabase.session(SessionMaker) as db:
         service = services.EventService(db)
-        db.add_venue(schemas.NewVenue(name='venue', city='Wien', capacity=2, events=[]))
-        db.add_user(schemas.NewUser(name='user 1', balance=20))
+        db.add_venue(generate.venue())
+        db.add_user(generate.user(balance=20))
         venues = db.get_venues()
-        db.add_event(schemas.NewEvent(name='event 1',
-                                      price=10,
-                                      venue_id=venues[0].id,
-                                      date=datetime.datetime.now(),
-                                      tickets=[],
-                                      artists=[]))
+        db.add_event(generate.event(venues[0].id, price=10))
         users = db.get_users()
         user_id = users[0].id
         events = db.get_events()

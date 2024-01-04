@@ -1,4 +1,6 @@
 import streamlit as st
+
+from backend import schemas
 from ui.server_connections import authentication, database
 from ui.server_connections.database import get_database
 
@@ -11,4 +13,10 @@ with connection.session as session:
     db = get_database(session)
     users = db.get_users()
     for user in users:
-        st.write("user " + user.name)
+        cols = st.columns(3)
+        with cols[0]:
+            st.write(user.first_name + ' ' + user.last_name)
+        with cols[1]:
+            st.write(user.email)
+        with cols[2]:
+            st.write(user.balance)

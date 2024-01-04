@@ -15,9 +15,14 @@ class Base(DeclarativeBase):
 class User(Base):
     __tablename__ = "user"
     _id: Mapped[uuid.UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
-    name: Mapped[str] = mapped_column(unique=True)
-    tickets: Mapped[List["Ticket"]] = relationship(back_populates="user")
+    first_name: Mapped[str]
+    last_name: Mapped[str]
+    email: Mapped[str] = mapped_column(unique=True)
+    password: Mapped[str]
+    role = Column(Enum(schemas.UserRole))
+    profile_visibility = Column(Enum(schemas.ProfileVisibility))
     balance: Mapped[int]
+    tickets: Mapped[List["Ticket"]] = relationship(back_populates="user")
 
     @property
     def id(self):

@@ -2,7 +2,7 @@ import datetime
 import uuid
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict, Field, AfterValidator, BeforeValidator
+from pydantic import BaseModel, ConfigDict, Field, BeforeValidator
 from typing_extensions import Annotated
 from bson import ObjectId as _ObjectId
 
@@ -20,8 +20,23 @@ class ORMModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class UserRole(Enum):
+    admin = 0
+    customer = 1
+
+
+class ProfileVisibility(Enum):
+    private = 0
+    public = 1
+
+
 class NewUser(ORMModel):
-    name: str
+    first_name: str
+    last_name: str
+    email: str
+    password: str
+    role: UserRole
+    profile_visibility: ProfileVisibility
     balance: int = 0
 
 
@@ -42,7 +57,7 @@ class NewTicket(ORMModel):
 
 
 class Ticket(NewTicket):
-    id: str | uuid.UUID = Field(alias='_id')
+    id: ObjectId = Field(alias='_id')
 
 
 class NewArtist(ORMModel):
@@ -52,7 +67,7 @@ class NewArtist(ORMModel):
 
 
 class Artist(NewArtist):
-    id: str | uuid.UUID = Field(alias='_id')
+    id: ObjectId = Field(alias='_id')
 
 
 class NewEvent(ORMModel):
@@ -65,7 +80,7 @@ class NewEvent(ORMModel):
 
 
 class Event(NewEvent):
-    id: str | uuid.UUID = Field(alias='_id')
+    id: ObjectId = Field(alias='_id')
 
 
 class NewVenue(ORMModel):
@@ -76,4 +91,4 @@ class NewVenue(ORMModel):
 
 
 class Venue(NewVenue):
-    id: str | uuid.UUID = Field(alias='_id')
+    id: ObjectId = Field(alias='_id')
