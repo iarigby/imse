@@ -46,7 +46,9 @@ class Ticket(NewTicket):
 
 
 class NewArtist(ORMModel):
-    name: str
+    first_name: str
+    last_name: str
+    stage_name: str
 
 
 class Artist(NewArtist):
@@ -59,20 +61,18 @@ class NewEvent(ORMModel):
     venue_id: str | uuid.UUID
     date: datetime.datetime
     artists: list[Artist]
+    tickets: list[Ticket]
 
 
 class Event(NewEvent):
     id: str | uuid.UUID = Field(alias='_id')
 
 
-class EventWithTickets(Event):
-    tickets: list[Ticket]
-
-
 class NewVenue(ORMModel):
     name: str
     city: str
     capacity: int
+    events: list[Event]
 
 
 class Venue(NewVenue):

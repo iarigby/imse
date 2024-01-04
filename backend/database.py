@@ -43,14 +43,6 @@ class Database(ABC):
         pass
 
     @abstractmethod
-    def get_events_with_tickets(self) -> list[schemas.EventWithTickets]:
-        pass
-
-    @abstractmethod
-    def get_event_with_tickets(self, ticket_id: str) -> schemas.EventWithTickets:
-        pass
-
-    @abstractmethod
     def add_event(self, event: schemas.NewEvent):
         pass
 

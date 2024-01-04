@@ -62,10 +62,6 @@ class SqlDatabase(backend.database.Database):
         self.db.add(models.Ticket(**ticket.model_dump()))
         self.db.commit()
 
-    def get_event(self, event_id: str):
-        event = self.db.query(models.Event).filter_by(_id=event_id).one_or_none()
-        return schemas.Event.model_validate(event)
-
     def decrease_user_balance(self, user_id: str, amount: int):
         self.db.query(models.User).filter_by(_id=user_id).update(
             {models.User.balance: models.User.balance - amount})
@@ -83,15 +79,22 @@ class SqlDatabase(backend.database.Database):
         return [schemas.Venue.model_validate(venue) for venue in
                 self.db.query(models.Venue).all()]
 
-    def get_events_with_tickets(self) -> list[schemas.EventWithTickets]:  # type: ignore
-        return [schemas.EventWithTickets.model_validate(event)
-            for event in self.db.query(models.Event).join(models.Ticket, isouter=True).all()]
+    def get_events(self) -> list[schemas.EventWithTickets]:  # type: ignore
+        events = (self.db.query(models.Event)
+                  .join(models.Ticket, isouter=True)
+                  .join(models.EventArtist, isouter=True)
+                  .join(models.Artist, isouter=True)
+                  .all())
+        return [schemas.Event.model_validate(event) for event in events]
 
-    def get_event_with_tickets(self, event_id: str) -> schemas.EventWithTickets:
-        event = self.db.query(models.Event
-                              ).filter_by(_id=event_id).join(models.Ticket, isouter=True
-                                                             ).one_or_none()
-        return schemas.EventWithTickets.model_validate(event)
+    def get_event(self, event_id: str) -> schemas.Event:
+        event = (self.db.query(models.Event)
+                 .filter_by(_id=event_id)
+                 .join(models.Ticket, isouter=True)
+                 .join(models.EventArtist, isouter=True)
+                 .join(models.Artist, isouter=True)
+                 .one_or_none())
+        return schemas.Event.model_validate(event)
 
     def add_event(self, event: schemas.NewEvent):
         self.db.add(models.Event(**event.model_dump()))
@@ -99,10 +102,3 @@ class SqlDatabase(backend.database.Database):
 
     def get_tickets(self) -> list[schemas.Ticket]:
         return [schemas.Ticket.model_validate(t) for t in self.db.query(models.Ticket).all()]
-
-    def get_events(self) -> list[schemas.Event]:
-        return [schemas.Event.model_validate(event)
-                for event in self.db.query(models.Event)
-                .join(models.EventArtist, isouter=True)
-                .join(models.Artist, isouter=True)
-                .all()]

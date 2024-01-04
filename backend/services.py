@@ -28,13 +28,13 @@ class EventService:
         )
 
         user = self.db.get_user(user_id)
-        event_with_tickets = self.db.get_event_with_tickets(event_id)
-        venue = self.db.get_venue(event_with_tickets.venue_id)
+        event = self.db.get_event(event_id)
+        venue = self.db.get_venue(event.venue_id)
 
-        if user.balance < event_with_tickets.price:
+        if user.balance < event.price:
             raise OutOfBalanceError()
-        if venue.capacity == len(event_with_tickets.tickets):
+        if venue.capacity == len(event.tickets):
             raise OutOfSpaceError()
 
         self.db.add_ticket(ticket)
-        self.db.decrease_user_balance(user_id, event_with_tickets.price)
+        self.db.decrease_user_balance(user_id, event.price)

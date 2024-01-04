@@ -12,7 +12,8 @@ REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 
 app = Celery('tasks',
              broker=os.environ.get('CELERY_BROKER_URL', f'redis://{REDIS_HOST}:6379/0'),
-             backend=os.environ.get('CELERY_RESULT_BACKEND', f'redis://{REDIS_HOST}:6379/0'))
+             backend=os.environ.get('CELERY_RESULT_BACKEND', f'redis://{REDIS_HOST}:6379/0'),
+             broker_connection_retry_on_startup=True)
 
 
 def get_migration_task():
