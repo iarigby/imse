@@ -87,6 +87,7 @@ class NewVenue(ORMModel):
     name: str
     city: str
     capacity: int
+    # TODO remove
     events: list[Event]
 
 

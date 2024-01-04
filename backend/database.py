@@ -38,6 +38,9 @@ class Database(ABC):
     def get_event(self, event_id: str):
         pass
 
+    def get_events(self):
+        pass
+
     @abstractmethod
     def decrease_user_balance(self, user_id: str, amount: int):
         pass

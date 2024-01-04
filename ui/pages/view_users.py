@@ -1,6 +1,5 @@
 import streamlit as st
 
-from backend import schemas
 from ui.server_connections import authentication, database
 from ui.server_connections.database import get_database
 

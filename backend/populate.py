@@ -20,3 +20,9 @@ default_config = Config()
 def populate_database(db: Database, config: Config = default_config):
     for user in range(config.users):
         db.add_user(generate.user())
+    for venue in range(config.venues):
+        db.add_venue(generate.venue())
+    venues = db.get_venues()
+    for venue in venues:
+        for event in range(config.events):
+            db.add_event(generate.event(venue.id))
