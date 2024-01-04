@@ -2,7 +2,7 @@ import datetime
 import uuid
 from typing import List
 
-from sqlalchemy import ForeignKey, Enum, Column
+from sqlalchemy import ForeignKey, Enum, Column, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 
 from backend import schemas
@@ -52,6 +52,14 @@ class Venue(Base):
         return self._id
 
 
+EventArtist = Table(
+    "event_artist",
+    Base.metadata,
+    Column("left_id", ForeignKey("event._id")),
+    Column("right_id", ForeignKey("artist._id")),
+)
+
+
 class Event(Base):
     __tablename__ = "event"
     _id: Mapped[uuid.UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
@@ -60,8 +68,17 @@ class Event(Base):
     price: Mapped[int]
     venue: Mapped["Venue"] = relationship(back_populates="events")
     venue_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("venue._id"))
+    date: Mapped[datetime.datetime]
+    artists: Mapped[List["Artist"]] = relationship(
+        secondary=EventArtist, back_populates="events")
 
     @property
     def id(self):
         return self._id
 
+
+class Artist(Base):
+    __tablename__ = "artist"
+    _id: Mapped[uuid.UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
+    name: Mapped[str]
+    events: Mapped[List["Event"]] = relationship(secondary=EventArtist, back_populates="artists")

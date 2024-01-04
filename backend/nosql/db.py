@@ -17,8 +17,8 @@ class MongoDatabase(backend.database.Database):
 
     @staticmethod
     def database(args=None):
-        uri = f'mongodb://{os.environ.get("MONGO_HOST", "localhost")}:27017/admin'
-        client = MongoClient(uri)
+        uri = f'mongodb://{os.environ.get("MONGO_HOST", "localhost")}:27017/admin?uuidRepresentation=standard'
+        client = MongoClient(uri, uuidRepresentation='standard')
         client.admin.command('ping')
         return client
 
@@ -34,7 +34,7 @@ class MongoDatabase(backend.database.Database):
 
     def get_users(self) -> list[schemas.User]:
         users = self.client.imse.users.find()
-        return [schemas.User(id=str(user['_id']), **user) for user in users]
+        return [schemas.User.model_validate(user) for user in users]
 
     def add_user(self, user: schemas.NewUser):
         self.client.imse.users.insert_one(user.model_dump())

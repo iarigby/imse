@@ -1,3 +1,5 @@
+import datetime
+
 from backend import schemas
 from backend.sql.db import SqlDatabase
 from backend import services
@@ -23,7 +25,11 @@ def test_buy_ticket():
         db.add_venue(schemas.NewVenue(name='venue', city='Wien', capacity=2))
         db.add_user(schemas.NewUser(name='user 1', balance=20))
         venues = db.get_venues()
-        db.add_event(schemas.NewEvent(name='event 1', price=10, venue_id=venues[0].id))
+        db.add_event(schemas.NewEvent(name='event 1',
+                                      price=10,
+                                      venue_id=venues[0].id,
+                                      date=datetime.datetime.now(),
+                                      artists=[]))
         users = db.get_users()
         user_id = users[0].id
         events = db.get_events()
