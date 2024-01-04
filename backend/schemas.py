@@ -13,7 +13,7 @@ class NewUser(BaseModel):
 
 
 class User(NewUser):
-    id: uuid.UUID
+    id: str | uuid.UUID
 
 
 class TicketStatus(Enum):
@@ -24,26 +24,26 @@ class TicketStatus(Enum):
 class NewTicket(BaseModel):
     purchase_date: datetime.datetime
     status: TicketStatus
-    user_id: uuid.UUID
-    event_id: uuid.UUID
+    user_id: str | uuid.UUID
+    event_id: str | uuid.UUID
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class Ticket(NewTicket):
-    id: uuid.UUID
+    id: str | uuid.UUID
 
 
 class NewEvent(BaseModel):
     name: str
     price: int = 0
-    venue_id: uuid.UUID
+    venue_id: str | uuid.UUID
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class Event(NewEvent):
-    id: uuid.UUID
+    id: str | uuid.UUID
 
 
 class EventWithTickets(Event):
@@ -57,4 +57,4 @@ class NewVenue(BaseModel):
 
 
 class Venue(NewVenue):
-    id: uuid.UUID
+    id: str | uuid.UUID

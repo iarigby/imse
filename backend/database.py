@@ -1,12 +1,25 @@
-import uuid
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
+from contextlib import contextmanager
 
 from backend import schemas
 
 
 class Database(ABC):
+    @staticmethod
     @abstractmethod
-    def get_user(self, user_id: uuid.UUID) -> schemas.User:
+    @contextmanager
+    def session(args) -> Database:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def database(args):
+        pass
+
+    @abstractmethod
+    def get_user(self, user_id: str) -> schemas.User:
         pass
 
     @abstractmethod
@@ -22,11 +35,11 @@ class Database(ABC):
         pass
 
     @abstractmethod
-    def get_event(self, event_id: uuid.UUID):
+    def get_event(self, event_id: str):
         pass
 
     @abstractmethod
-    def decrease_user_balance(self, user_id: uuid.UUID, amount: int):
+    def decrease_user_balance(self, user_id: str, amount: int):
         pass
 
     @abstractmethod
@@ -34,7 +47,7 @@ class Database(ABC):
         pass
 
     @abstractmethod
-    def get_event_with_tickets(self, ticket_id: uuid.UUID) -> schemas.EventWithTickets:
+    def get_event_with_tickets(self, ticket_id: str) -> schemas.EventWithTickets:
         pass
 
     @abstractmethod
@@ -46,13 +59,14 @@ class Database(ABC):
         pass
 
     @abstractmethod
-    def get_venue(self, venue_id: uuid.UUID):
+    def get_venue(self, venue_id: str):
         pass
 
     @abstractmethod
     def get_venues(self):
         pass
 
+    @staticmethod
     @abstractmethod
-    def reset(self):
+    def reset(client):
         pass

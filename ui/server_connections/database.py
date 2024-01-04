@@ -1,7 +1,9 @@
 import os
+from contextlib import contextmanager
+
 import streamlit as st
 
-
+import backend.sql.db
 from backend.database import Database
 from backend.nosql.db import MongoDatabase
 from backend.sql.db import SqlDatabase
@@ -12,26 +14,52 @@ class Keys:
     session_db_key = 'DB_TYPE'
     db_sql = "sql"
     db_mongo = "mongo"
-    db_initialised_prefix = 'DB_INITIALISED'
 
 
-def init_session_and_get_database() -> Database:
+def init_db_and_get_connection():
     if Keys.session_db_key not in st.session_state:
         set_database(os.environ.get(Keys.session_db_key, Keys.db_sql))
-    db = get_database()
-    session_db_initialised = Keys.db_initialised_prefix + current_database()
-
-    if session_db_initialised not in st.session_state:
-        st.session_state[session_db_initialised] = 1
-        db.reset()
-        populate_database(db)
-    return db
+    connection = get_connection()
+    return connection
 
 
-def get_database():
+def get_database(session) -> Database:
     if current_database() == Keys.db_sql:
-        return SqlDatabase()
-    return MongoDatabase()
+        return SqlDatabase(session)
+    return MongoDatabase(session)
+
+
+def reset_database():
+    connection = get_connection()
+    if current_database() == Keys.db_sql:
+        SqlDatabase.reset(connection.engine)
+    else:
+        mongo_client = MongoDatabase(MongoDatabase.database(connection))
+        MongoDatabase.reset(mongo_client)
+    with connection.session as session:
+        db = get_database(session)
+        populate_database(db)
+
+
+@st.cache_resource
+def mongo_connection():
+    return MongoDatabase.database()
+
+
+class ConnectionWrapper:
+    def __init__(self, mongo_conn):
+        self.mongo_connection = mongo_conn
+
+    @property
+    @contextmanager
+    def session(self):
+        yield self.mongo_connection
+
+
+def get_connection():
+    if current_database() == Keys.db_sql:
+        return st.connection("sql_db", type="sql", url=backend.sql.db.SQLALCHEMY_DATABASE_URL)
+    return ConnectionWrapper(mongo_connection())
 
 
 def switch_database():

@@ -1,5 +1,4 @@
 import datetime
-import uuid
 
 from backend import schemas
 from backend.database import Database
@@ -20,13 +19,14 @@ class EventService:
     def __init__(self, db: Database):
         self.db = db
 
-    def buy_ticket(self, user_id: uuid.UUID, event_id: uuid.UUID):
+    def buy_ticket(self, user_id: str, event_id: str):
         ticket = schemas.NewTicket(
             purchase_date=datetime.datetime.now(),
             status=TicketStatus.BOOKED,
             user_id=user_id,
             event_id=event_id
         )
+
         user = self.db.get_user(user_id)
         event_with_tickets = self.db.get_event_with_tickets(event_id)
         venue = self.db.get_venue(event_with_tickets.venue_id)
