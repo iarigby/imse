@@ -4,8 +4,7 @@ from backend import generate, schemas
 from backend.sql.db import SqlDatabase
 from backend import services
 
-engine = SqlDatabase.engine(conn_url="sqlite:///./test.db")
-SessionMaker = SqlDatabase.database(engine)
+from .setup import engine, SessionMaker
 
 
 def test_sqldb():

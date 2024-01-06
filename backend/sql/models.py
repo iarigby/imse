@@ -20,8 +20,8 @@ class User(Base):
     last_name: Mapped[str]
     email: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str]
-    role = Column(Enum(schemas.UserRole))
-    profile_visibility = Column(Enum(schemas.ProfileVisibility))
+    role: Mapped[str]
+    profile_visibility: Mapped[str]
     balance: Mapped[int]
     tickets: Mapped[List["Ticket"]] = relationship(back_populates="user")
 
@@ -38,7 +38,7 @@ class Ticket(Base):
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user._id"))
     user: Mapped["User"] = relationship(back_populates="tickets")
     purchase_date: Mapped[datetime.datetime]
-    status = Column(Enum(schemas.TicketStatus))
+    status: Mapped[str]
 
     @property
     def id(self):

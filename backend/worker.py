@@ -6,6 +6,8 @@ from celery.result import AsyncResult
 from celery import Celery
 from redis import Redis
 
+from backend.nosql.db import MongoDatabase
+from backend.sql.db import SqlDatabase
 
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 
@@ -42,7 +44,15 @@ def get_migration_task():
 def migrate():
     # on other pages check if session variable is changed. Eventually
     # the dashboard function will change it and pages will be reloaded
-    sleep(15)
+    mongo_client = MongoDatabase.database()
+    mongo_db = MongoDatabase(mongo_client)
+    engine = SqlDatabase.engine()
+    SessionMaker = SqlDatabase.database(engine)
+    with SqlDatabase.session(SessionMaker) as sql_db:
+        mongo_db.add_users(sql_db.get_users())
+        mongo_db.add_venues(sql_db.get_venues())
+        mongo_db.add_events(sql_db.get_events())
+
     return "migration completed"
 
 

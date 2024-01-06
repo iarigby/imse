@@ -2,8 +2,8 @@ import datetime
 import uuid
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict, Field, BeforeValidator
-from typing_extensions import Annotated
+from pydantic import BaseModel, ConfigDict, Field, BeforeValidator, field_serializer
+from typing_extensions import Annotated, Literal
 from bson import ObjectId as _ObjectId
 
 
@@ -20,23 +20,13 @@ class ORMModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class UserRole(Enum):
-    admin = 0
-    customer = 1
-
-
-class ProfileVisibility(Enum):
-    private = 0
-    public = 1
-
-
 class NewUser(ORMModel):
     first_name: str
     last_name: str
     email: str
     password: str
-    role: UserRole
-    profile_visibility: ProfileVisibility
+    role: str
+    profile_visibility: str
     balance: int = 0
 
 
@@ -49,14 +39,9 @@ class VenueReport(BaseModel):
     tickets_purchased: int
 
 
-class TicketStatus(Enum):
-    BOOKED = 0
-    CANCELLED = 1
-
-
 class NewTicket(ORMModel):
     purchase_date: datetime.datetime
-    status: TicketStatus
+    status: str
     user_id: str | uuid.UUID
     event_id: str | uuid.UUID
 

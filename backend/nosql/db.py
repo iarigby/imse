@@ -16,7 +16,7 @@ class MongoDatabase(backend.database.Database):
         yield MongoDatabase(client)
 
     @staticmethod
-    def database(args=None):
+    def database(args=None) -> MongoClient:
         uri = f'mongodb://{os.environ.get("MONGO_HOST", "localhost")}:27017/admin?uuidRepresentation=standard'
         client = MongoClient(uri, uuidRepresentation='standard')
         client.admin.command('ping')
@@ -38,6 +38,15 @@ class MongoDatabase(backend.database.Database):
 
     def add_user(self, user: schemas.NewUser):
         self.client.imse.users.insert_one(user.model_dump())
+
+    def get_events(self):
+        return [schemas.Event.model_validate(event) for event in self.client.imse.events.find()]
+
+    def get_top_users_for_venue(self, venue_id) -> list[schemas.VenueReport]:
+        pass
+
+    def get_user_by_email(self, user_name: str) -> schemas.User:
+        pass
 
     def add_ticket(self, ticket: schemas.NewTicket):
         pass
@@ -64,4 +73,13 @@ class MongoDatabase(backend.database.Database):
         pass
 
     def get_venues(self):
-        pass
+        return [schemas.Venue.model_validate(venue) for venue in self.client.imse.venues.find()]
+
+    def add_users(self, users: list[schemas.User]):
+        self.client.imse.users.insert_many([user.model_dump(by_alias=True) for user in users])
+
+    def add_venues(self, venues: list[schemas.Venue]):
+        self.client.imse.venues.insert_many([venue.model_dump(by_alias=True) for venue in venues])
+
+    def add_events(self, events: list[schemas.Event]):
+        self.client.imse.events.insert_many([event.model_dump(by_alias=True) for event in events])

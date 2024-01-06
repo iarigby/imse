@@ -2,7 +2,6 @@ import datetime
 
 from backend import schemas
 from backend.database import Database
-from backend.schemas import TicketStatus
 
 
 class OutOfBalanceError(BaseException):
@@ -22,7 +21,7 @@ class EventService:
     def buy_ticket(self, user_id: str, event_id: str):
         ticket = schemas.NewTicket(
             purchase_date=datetime.datetime.now(),
-            status=TicketStatus.BOOKED,
+            status='booked',
             user_id=user_id,
             event_id=event_id
         )
