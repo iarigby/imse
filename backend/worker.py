@@ -40,6 +40,8 @@ def get_migration_task():
 
 @app.task
 def migrate():
+    # on other pages check if session variable is changed. Eventually
+    # the dashboard function will change it and pages will be reloaded
     sleep(15)
     return "migration completed"
 

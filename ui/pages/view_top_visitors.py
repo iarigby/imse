@@ -21,4 +21,3 @@ with cols[1]:
 
 st.write(sort)
 st.write(month)
-

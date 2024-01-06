@@ -23,9 +23,9 @@ def display_buy_ticket():
             user: schemas.User = random.choice(users)
             try:
                 service.buy_ticket(user_id=user.id, event_id=event.id)
-            except services.OutOfBalanceError():
+            except services.OutOfBalanceError:
                 st.error("Not enough balance on account")
-            except services.OutOfSpaceError():
+            except services.OutOfSpaceError:
                 st.error("Sorry, there are no more tickets left for this event")
 
 
@@ -49,4 +49,5 @@ for i in range(ceil(len(events)/col_number)):
                 st.write(event.date.date())
                 st.write(event.name)
                 st.write("location: " + venue.name + " in " + venue.city)
+                st.write("€" + str(event.price))
                 display_buy_ticket()

@@ -23,6 +23,10 @@ class Database(ABC):
         pass
 
     @abstractmethod
+    def get_user_by_email(self, user_name: str) -> schemas.User:
+        pass
+
+    @abstractmethod
     def get_users(self) -> list[schemas.User]:
         pass
 

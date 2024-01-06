@@ -51,6 +51,10 @@ class SqlDatabase(backend.database.Database):
         user = self.db.query(models.User).filter_by(_id=user_id).one_or_none()
         return schemas.User.model_validate(user)
 
+    def get_user_by_email(self, email: str) -> schemas.User:
+        user = self.db.query(models.User).filter_by(email=email).one_or_none()
+        return schemas.User.model_validate(user)
+
     def get_users(self) -> list[schemas.User]:
         return [schemas.User.model_validate(user) for user in self.db.query(models.User).all()]
 

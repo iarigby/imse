@@ -2,19 +2,23 @@ from extra_streamlit_components import CookieManager
 from ui.components.login import display_login
 import streamlit as st
 
+user_id_key = 'user_id'
 
-authentication_cookie = 'authentication_token'
+
+def get_user_id():
+    cookies = CookieManager(key='c')
+    return cookies.get(user_id_key)
 
 
 def authorize():
     cookies = CookieManager(key='a')
-    if not cookies.get(authentication_cookie):
-        token = display_login()
-        if token is None:
+    if not cookies.get(user_id_key):
+        user_id = display_login()
+        if user_id is None:
             st.stop()
         else:
-            st.text("setting token")
-            cookies.set(authentication_cookie, token)
+            st.text("setting user_id")
+            cookies.set(user_id_key, user_id)
     else:
         with st.sidebar:
             if st.button("Log Out"):
@@ -23,4 +27,4 @@ def authorize():
 
 def logout():
     cookies = CookieManager(key='b')
-    cookies.set(authentication_cookie, "")
+    cookies.set(user_id_key, "")

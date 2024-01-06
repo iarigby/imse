@@ -5,11 +5,11 @@ from backend.database import Database
 from backend.schemas import TicketStatus
 
 
-class OutOfBalanceError(Exception):
+class OutOfBalanceError(BaseException):
     pass
 
 
-class OutOfSpaceError(Exception):
+class OutOfSpaceError(BaseException):
     pass
 
 
