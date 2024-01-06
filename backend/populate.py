@@ -3,7 +3,7 @@ import random
 from backend.database import Database
 
 from dataclasses import dataclass
-from backend import generate, services, schemas
+from backend import generate, services
 
 
 @dataclass

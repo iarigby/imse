@@ -27,5 +27,3 @@ def test_migration():
     assert len(users) == len(migrated_users)
     assert len(venues) == len(migrated_venues)
     assert len(events) == len(migrated_events)
-
-

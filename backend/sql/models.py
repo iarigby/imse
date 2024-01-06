@@ -2,11 +2,8 @@ import datetime
 import uuid
 from typing import List
 
-from sqlalchemy import ForeignKey, Enum, Column, Table
-from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy import ForeignKey, Column, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
-
-from backend import schemas
 
 
 class Base(DeclarativeBase):
