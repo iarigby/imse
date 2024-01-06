@@ -44,6 +44,11 @@ class User(NewUser):
     id: ObjectId = Field(alias='_id')
 
 
+class VenueReport(BaseModel):
+    user: User
+    tickets_purchased: int
+
+
 class TicketStatus(Enum):
     BOOKED = 0
     CANCELLED = 1

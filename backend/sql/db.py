@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from contextlib import contextmanager
+from typing import Type
 
 from sqlalchemy import create_engine, StaticPool
 from sqlalchemy.orm import sessionmaker, Session
@@ -58,9 +59,11 @@ class SqlDatabase(backend.database.Database):
     def get_users(self) -> list[schemas.User]:
         return [schemas.User.model_validate(user) for user in self.db.query(models.User).all()]
 
-    def add_user(self, user: schemas.NewUser):
-        self.db.add(models.User(**user.model_dump()))
+    def add_user(self, user: schemas.NewUser) -> schemas.User:
+        db_user = models.User(**user.model_dump())
+        self.db.add(db_user)
         self.db.commit()
+        return schemas.User.model_validate(db_user)
 
     def add_ticket(self, ticket: schemas.NewTicket):
         self.db.add(models.Ticket(**ticket.model_dump()))
@@ -71,9 +74,11 @@ class SqlDatabase(backend.database.Database):
             {models.User.balance: models.User.balance - amount})
         self.db.commit()
 
-    def add_venue(self, venue: schemas.NewVenue):
-        self.db.add(models.Venue(**venue.model_dump()))
+    def add_venue(self, venue: schemas.NewVenue) -> schemas.Venue:
+        db_venue = models.Venue(**venue.model_dump())
+        self.db.add(db_venue)
         self.db.commit()
+        return schemas.Venue.model_validate(db_venue)
 
     def get_venue(self, venue_id: str):
         venue = self.db.query(models.Venue).filter_by(_id=venue_id).one_or_none()
@@ -100,9 +105,22 @@ class SqlDatabase(backend.database.Database):
                  .one_or_none())
         return schemas.Event.model_validate(event)
 
-    def add_event(self, event: schemas.NewEvent):
-        self.db.add(models.Event(**event.model_dump()))
+    def add_event(self, event: schemas.NewEvent) -> schemas.Event:
+        db_event = models.Event(**event.model_dump())
+        self.db.add(db_event)
         self.db.commit()
+        return schemas.Event.model_validate(db_event)
 
     def get_tickets(self) -> list[schemas.Ticket]:
         return [schemas.Ticket.model_validate(t) for t in self.db.query(models.Ticket).all()]
+
+    # need to add date
+    def get_top_users_for_venue(self, venue_id) -> list[schemas.VenueReport]:
+        users: list[Type[models.User]] = (self.db.query(models.User)
+                                          .join(models.Ticket)
+                                          .join(models.Event)
+                                          .filter_by(venue_id=venue_id)
+                                          .all())
+        return [schemas.VenueReport(user=schemas.User.model_validate(user),
+                                    tickets_purchased=len(user.tickets)
+                                    ) for user in users]

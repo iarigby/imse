@@ -31,7 +31,7 @@ class Database(ABC):
         pass
 
     @abstractmethod
-    def add_user(self, user: schemas.NewUser):
+    def add_user(self, user: schemas.NewUser) -> schemas.User:
         pass
 
     @abstractmethod
@@ -51,11 +51,11 @@ class Database(ABC):
         pass
 
     @abstractmethod
-    def add_event(self, event: schemas.NewEvent):
+    def add_event(self, event: schemas.NewEvent) -> schemas.Event:
         pass
 
     @abstractmethod
-    def add_venue(self, venue: schemas.NewVenue):
+    def add_venue(self, venue: schemas.NewVenue) -> schemas.Venue:
         pass
 
     @abstractmethod
@@ -64,6 +64,10 @@ class Database(ABC):
 
     @abstractmethod
     def get_venues(self):
+        pass
+
+    @abstractmethod
+    def get_top_users_for_venue(self, venue_id) -> list[schemas.VenueReport]:
         pass
 
     @staticmethod
