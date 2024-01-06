@@ -48,10 +48,10 @@ class MongoDatabase(backend.database.Database):
     def decrease_user_balance(self, user_id: str, amount: int):
         pass
 
-    def get_events_with_tickets(self) -> list[schemas.EventWithTickets]:
+    def get_events_with_tickets(self) -> list[schemas.Event]:
         pass
 
-    def get_event_with_tickets(self, ticket_id: str) -> schemas.EventWithTickets:
+    def get_event_with_tickets(self, ticket_id: str) -> schemas.Event:
         pass
 
     def add_event(self, event: schemas.NewEvent):

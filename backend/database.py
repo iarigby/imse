@@ -38,6 +38,7 @@ class Database(ABC):
     def get_event(self, event_id: str):
         pass
 
+    @abstractmethod
     def get_events(self):
         pass
 
