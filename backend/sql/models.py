@@ -13,13 +13,13 @@ class Base(DeclarativeBase):
 class User(Base):
     __tablename__ = "user"
     _id: Mapped[uuid.UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
-    first_name: Mapped[str]
-    last_name: Mapped[str]
-    email: Mapped[str] = mapped_column(unique=True)
-    password: Mapped[str]
-    role: Mapped[str]
-    profile_visibility: Mapped[str]
-    balance: Mapped[int]
+    first_name: Mapped[str] = mapped_column(nullable=False)
+    last_name: Mapped[str] = mapped_column(nullable=False)
+    email: Mapped[str] = mapped_column(unique=True, nullable=False)
+    password: Mapped[str] = mapped_column(nullable=False)
+    role: Mapped[str] = mapped_column(nullable=False, default='customer')
+    profile_visibility: Mapped[str] = mapped_column(nullable=False, default='private')
+    balance: Mapped[int] = mapped_column(nullable=False)
     tickets: Mapped[List["Ticket"]] = relationship(back_populates="user")
 
     @property
@@ -30,12 +30,12 @@ class User(Base):
 class Ticket(Base):
     __tablename__ = "ticket"
     _id: Mapped[uuid.UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
-    event_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("event._id"))
+    event_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("event._id"), nullable=False)
     event: Mapped["Event"] = relationship(back_populates="tickets")
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user._id"))
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user._id"), nullable=False)
     user: Mapped["User"] = relationship(back_populates="tickets")
-    purchase_date: Mapped[datetime.datetime]
-    status: Mapped[str]
+    purchase_date: Mapped[datetime.datetime] = mapped_column(nullable=False)
+    status: Mapped[str] = mapped_column(nullable=False, default='booked')
 
     @property
     def id(self):
@@ -45,9 +45,9 @@ class Ticket(Base):
 class Venue(Base):
     __tablename__ = "venue"
     _id: Mapped[uuid.UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
-    name: Mapped[str]
-    city: Mapped[str]
-    capacity: Mapped[int]
+    name: Mapped[str] = mapped_column(nullable=False)
+    city: Mapped[str] = mapped_column(nullable=False)
+    capacity: Mapped[int] = mapped_column(nullable=False)
     events: Mapped[List["Event"]] = relationship(back_populates="venue")
 
     @property
@@ -66,12 +66,12 @@ EventArtist = Table(
 class Event(Base):
     __tablename__ = "event"
     _id: Mapped[uuid.UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
-    name: Mapped[str]
+    name: Mapped[str] = mapped_column(nullable=False)
     tickets: Mapped[List["Ticket"]] = relationship(back_populates="event")
-    price: Mapped[int]
+    price: Mapped[int] = mapped_column(nullable=False)
     venue: Mapped["Venue"] = relationship(back_populates="events")
-    venue_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("venue._id"))
-    date: Mapped[datetime.datetime]
+    venue_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("venue._id"), nullable=False)
+    date: Mapped[datetime.datetime] = mapped_column(nullable=False)
     artists: Mapped[List["Artist"]] = relationship(
         secondary=EventArtist, back_populates="events")
 
@@ -83,5 +83,5 @@ class Event(Base):
 class Artist(Base):
     __tablename__ = "artist"
     _id: Mapped[uuid.UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
-    name: Mapped[str]
+    name: Mapped[str] = mapped_column(nullable=False)
     events: Mapped[List["Event"]] = relationship(secondary=EventArtist, back_populates="artists")
