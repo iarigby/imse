@@ -63,17 +63,39 @@ following containers are part of the full deployment
 - our package - entrypoint `celery backend/worker.py`  for running celery workers
 - our package - entrypoint `streamlit ui/dashboard.py` for running the application
 
+### Exporting sql scripts
+```shell
+poetry run export_schemas
+```
 
+I also set up to do it from alembic but the result is same. Still will document the process
+#### Setup
+```shell
+alembic init alembic
+```
+Change alembic configuration in `env.py`:
+```python
+from backend.sql.models import Base
+# find this line and change to
+# target_metadata = None
+target_metadata = Base.metadata
+```
+
+Change sqlalchemy url in `alembic.ini` to `postgresql://postgres:postgres@localhost/backend`
+
+#### Generate
+```
+alembic revision --autogenerate -m "initialise schemas"
+```
+
+copy revision number from the output
+
+```shell
+alembic upgrade $REVISION_NUMBER --sql > create_table.sql
+```
+You will need to delete `alembic/versions` to regenerate it
 
 ## TODO
-
-### Issues
-- cannot launch streamlit inside a container
-
-### Tasks
-- add environment variable for sqlite connection
-- implement authentication (see how the db connection is handled in this case)
-- use streamlit connection with the database and redis https://docs.streamlit.io/library/api-reference/connections/st.connections.sqlconnection
 
 ### Later/maybe
 - track task progress https://pypi.org/project/celery-progress/

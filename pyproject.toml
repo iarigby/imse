@@ -6,6 +6,9 @@ authors = ["Ia Mgvdliashvili <marvinzem@gmail.com>"]
 readme = "README.md"
 packages = [{include = "backend"}, {include="ui"}]
 
+[tool.poetry.scripts]
+export_schemas="backend.export_schemas:main"
+
 [tool.poetry.dependencies]
 python = "^3.11"
 sqlalchemy = "^2.0.23"
