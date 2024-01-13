@@ -65,8 +65,6 @@ class SqlDatabase(backend.database.Database):
         self.db.commit()
         return schemas.User.model_validate(db_user)
 
-
-
     def decrease_user_balance(self, user_id: str, amount: int):
         self.db.query(models.User).filter_by(_id=user_id).update(
             {models.User.balance: models.User.balance - amount})
@@ -109,6 +107,21 @@ class SqlDatabase(backend.database.Database):
         self.db.commit()
         return schemas.Event.model_validate(db_event)
 
+    def add_artist(self, artist: schemas.NewArtist):
+        self.db.add(models.Ticket(**artist.model_dump()))
+        self.db.commit()
+
+    def get_artists(self) -> list[schemas.Artist]:
+        return [schemas.Artist.model_validate(t) for t in self.db.query(models.Ticket).all()]
+
+    def get_artist(self, artist_id: str) -> schemas.Artist:
+        artist = (self.db.query(models.Artist)
+                  .filter_by(_id=artist_id)
+                  .join(models.Venue, isouter=True)
+                  .join(models.Ticket, isouter=True)
+                  .one_or_none())
+        return schemas.Artist.model_validate(artist)
+
     def add_ticket(self, ticket: schemas.NewTicket):
         self.db.add(models.Ticket(**ticket.model_dump()))
         self.db.commit()
@@ -118,10 +131,10 @@ class SqlDatabase(backend.database.Database):
 
     def get_ticket(self, ticket_id: str) -> schemas.Ticket:
         ticket = (self.db.query(models.Ticket)
-                 .filter_by(_id=ticket_id)
-                 .join(models.Event, isouter=True)
-                 .join(models.User, isouter=True)
-                 .one_or_none())
+                  .filter_by(_id=ticket_id)
+                  .join(models.Event, isouter=True)
+                  .join(models.User, isouter=True)
+                  .one_or_none())
         return schemas.Ticket.model_validate(ticket)
 
     def del_ticket(self, ticket_id):

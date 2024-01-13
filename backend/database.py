@@ -35,6 +35,18 @@ class Database(ABC):
         pass
 
     @abstractmethod
+    def add_artist(self, artist: schemas.NewArtist):
+        pass
+
+    @abstractmethod
+    def get_artist(self, artist_id: str) -> schemas.Artist:
+        pass
+
+    @abstractmethod
+    def get_artists(self):
+        pass
+
+    @abstractmethod
     def add_ticket(self, ticket: schemas.NewTicket):
         pass
 
@@ -52,6 +64,10 @@ class Database(ABC):
 
     @abstractmethod
     def get_event(self, event_id: str) -> schemas.Event:
+        pass
+
+    @abstractmethod
+    def get_events_by_artist(self, artist_id: str) -> list[schemas.Event]:
         pass
 
     @abstractmethod
@@ -80,6 +96,10 @@ class Database(ABC):
 
     @abstractmethod
     def get_top_users_for_venue(self, venue_id) -> list[schemas.VenueReport]:
+        pass
+
+    @abstractmethod
+    def get_artist_success(self, venue_id) -> list[schemas.ArtistSuccess]:
         pass
 
     @staticmethod

@@ -59,6 +59,12 @@ class Artist(NewArtist):
     id: ObjectId = Field(alias='_id')
 
 
+class ArtistSuccess(BaseModel):
+    artist: Artist
+    sold_tickets: int
+    returned_tickets: int
+
+
 class NewEvent(ORMModel):
     name: str
     price: int = 0
