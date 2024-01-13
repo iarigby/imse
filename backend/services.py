@@ -1,4 +1,7 @@
 import datetime
+import timedelta
+import streamlit as st
+
 
 from backend import schemas
 from backend.database import Database
@@ -9,6 +12,10 @@ class OutOfBalanceError(BaseException):
 
 
 class OutOfSpaceError(BaseException):
+    pass
+
+
+class LateCancelation(BaseException):
     pass
 
 
@@ -37,3 +44,16 @@ class EventService:
 
         self.db.add_ticket(ticket)
         self.db.decrease_user_balance(user_id, event.price)
+
+    def cancel_ticket(self, ticket_id: str):
+        ticket = self.db.get_ticket(ticket_id)
+        event = self.db.get_event(event_id=ticket.event_id)
+        event_date = event.date
+        current_date = datetime.now()
+        two_weeks_ago = event_date - timedelta(weeks=2)
+        if current_date > two_weeks_ago:
+            raise LateCancelation()
+        self.db.del_ticket(ticket_id)
+
+        # self.db.add_ticket(ticket)
+

@@ -35,6 +35,14 @@ def event(venue_id: str | uuid.UUID,
                             tickets=[])
 
 
+def ticket(user_id: str | uuid.UUID,
+           event_id: str | uuid.UUID) -> schemas.NewEvent:
+    return schemas.NewEvent(purchase_date=fake.past_date(),
+                            status=random.choice(['purchased', 'cancelled']),
+                            user_id=user_id,
+                            event_id=event_id)
+
+
 def artist() -> schemas.NewArtist:
     return schemas.NewArtist(first_name=fake.unique.first_name(),
                              last_name=fake.last_name(),

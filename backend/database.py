@@ -39,7 +39,19 @@ class Database(ABC):
         pass
 
     @abstractmethod
-    def get_event(self, event_id: str):
+    def del_ticket(self, ticket: schemas.Ticket.id):
+        pass
+
+    @abstractmethod
+    def get_ticket(self, ticket_id: str) -> schemas.Ticket:
+        pass
+
+    @abstractmethod
+    def get_tickets(self):
+        pass
+
+    @abstractmethod
+    def get_event(self, event_id: str) -> schemas.Event:
         pass
 
     @abstractmethod
