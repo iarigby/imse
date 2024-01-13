@@ -3,10 +3,11 @@ import streamlit as st
 from ui.server_connections import authentication, database
 from ui.server_connections.database import get_database
 
-authentication.authorize()
+current_user_email = authentication.authorize()
 connection = database.init_db_and_get_connection()
 
-if authentication.get_user_id() != 'admin':
+
+if current_user_email != 'admin':
     st.write("Only admins can access this page")
     st.stop()
 

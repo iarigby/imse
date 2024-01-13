@@ -9,7 +9,7 @@ from backend import generate, services
 @dataclass
 class Config:
     artists: int = 5
-    users: int = 10
+    users: int = 20
     venues: int = 10
     venue_capacity: (int, int) = (20, 200)
     events: int = 10
@@ -23,7 +23,9 @@ def populate_database(db: Database, config: Config = default_config):
     fixed_user1 = generate.user()
     fixed_user1.email = "user1@example.org"
     fixed_user1.password = "sample_password"
-    print(fixed_user1)
+    fixed_user1.first_name = "Barbara"
+    fixed_user1.last_name = "Dalton"
+    fixed_user1.balance = 200
     db.add_user(fixed_user1)
     for user in range(config.users):
         db.add_user(generate.user())

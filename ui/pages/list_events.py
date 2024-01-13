@@ -10,7 +10,7 @@ from ui.server_connections import authentication, database
 from ui.server_connections.database import get_database
 
 
-authentication.authorize()
+current_user_email = authentication.authorize()
 connection = database.init_db_and_get_connection()
 
 
@@ -19,8 +19,7 @@ def display_buy_ticket():
         with connection.session as session:
             db = get_database(session)
             service = EventService(db)
-            users = db.get_users()
-            user: schemas.User = random.choice(users)
+            user: schemas.User = db.get_user_by_email(current_user_email)
             try:
                 service.buy_ticket(user_id=user.id, event_id=event.id)
             except services.OutOfBalanceError:

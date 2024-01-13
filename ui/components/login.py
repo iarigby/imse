@@ -24,7 +24,7 @@ def display_login():
                     db = database.get_database(session)
                     user = db.get_user_by_email(email)
                 if user.password == password:
-                    return str(user.id)
+                    return str(user.email)
                 else:
                     st.write(user)
                     st.error("authentication failed: password is not correct")
