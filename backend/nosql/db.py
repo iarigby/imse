@@ -30,7 +30,8 @@ class MongoDatabase(backend.database.Database):
         client.drop_database('imse')
 
     def get_user(self, user_id: str) -> schemas.User:
-        pass
+        user = self.client.imse.users.find_one({'_id': user_id})
+        return schemas.User.model_validate(user)
 
     def get_users(self) -> list[schemas.User]:
         users = self.client.imse.users.find()
@@ -38,6 +39,15 @@ class MongoDatabase(backend.database.Database):
 
     def add_user(self, user: schemas.NewUser):
         self.client.imse.users.insert_one(user.model_dump())
+
+    def add_artist(self, artist: schemas.NewArtist):
+        pass
+
+    def get_artist(self, artist_id: str) -> schemas.Artist:
+        pass
+
+    def get_artists(self):
+        pass
 
     def get_events(self):
         return [schemas.Event.model_validate(event) for event in self.client.imse.events.find()]
@@ -50,6 +60,15 @@ class MongoDatabase(backend.database.Database):
 
     def add_ticket(self, ticket: schemas.NewTicket):
         pass
+
+    def get_ticket(self, ticket_id: str) -> schemas.Ticket:
+        pass
+
+    def del_ticket(self, ticket: schemas.Ticket.id):
+        pass
+
+    def get_tickets(self) -> list[schemas.Ticket]:
+        return [schemas.Ticket.model_validate(ticket) for ticket in self.client.imse.tickets.find()]
 
     def get_event(self, event_id: str):
         pass
@@ -83,3 +102,6 @@ class MongoDatabase(backend.database.Database):
 
     def add_events(self, events: list[schemas.Event]):
         self.client.imse.events.insert_many([event.model_dump(by_alias=True) for event in events])
+
+    def add_tickets(self, tickets: list[schemas.Ticket]):
+        self.client.imse.tickets.insert_many([ticket.model_dump(by_alias=True) for ticket in tickets])

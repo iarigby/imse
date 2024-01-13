@@ -28,7 +28,7 @@ def event(venue_id: str | uuid.UUID,
           price: Optional[int] = None,
           artists: Optional[list[str | uuid.UUID]] = None) -> schemas.NewEvent:
     return schemas.NewEvent(name=f"{it_f.city_prefix()} {it_f.city()} {it_f.city_suffix()}",
-                            price=price or random.randint(0, 100),
+                            price=price or random.randint(0, 50),
                             venue_id=venue_id,
                             date=fake.future_date(),
                             artists=artists or [],
@@ -56,4 +56,4 @@ def user(balance: int | None = None) -> schemas.NewUser:
                            password=fake.password(),
                            role='customer',
                            profile_visibility=random.choice(['public', 'private']),
-                           balance=balance or random.randint(0, 100))
+                           balance=balance or random.randint(100, 500))
