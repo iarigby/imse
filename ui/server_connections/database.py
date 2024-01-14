@@ -34,7 +34,7 @@ def reset_database():
     if current_database() == Keys.db_sql:
         SqlDatabase.reset(connection.engine)
     else:
-        mongo_client = MongoDatabase(MongoDatabase.database(connection))
+        mongo_client = MongoDatabase.database(connection)
         MongoDatabase.reset(mongo_client)
     with connection.session as session:
         db = get_database(session)

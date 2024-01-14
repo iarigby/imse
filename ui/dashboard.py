@@ -5,8 +5,9 @@ import streamlit as st
 from ui.server_connections import database, authentication, tasks
 from ui.server_connections.database import reset_database
 
-authentication.authorize()
 connection = database.init_db_and_get_connection()
+authentication.authorize(connection)
+
 
 st.title("Database Dashboard")
 

@@ -4,8 +4,8 @@ from ui.server_connections import authentication, database
 from ui.server_connections.database import get_database
 
 
-authentication.authorize()
 connection = database.init_db_and_get_connection()
+
 
 with connection.session as session:
     db = get_database(session)
@@ -23,6 +23,7 @@ with cols[1]:
 with connection.session as session:
     db = get_database(session)
     reports = db.get_top_users_for_venue(selected_venue.id)
+
 
 if sort == "Ascending":
     reports = sorted(reports, key=lambda r: r.tickets_purchased)

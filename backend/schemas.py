@@ -56,6 +56,9 @@ class Ticket(NewTicket):
         if type(data) == models.Ticket:
             return data
         if '_id' not in data:
+            for foreign_key in ['user_id', 'venue_id']:
+                if foreign_key in data and type(data[foreign_key]) != str:
+                    data[foreign_key] = str(data[foreign_key])
             data['_id'] = data['event_id'] + data['user_id']
         return data
 
@@ -79,7 +82,7 @@ class ArtistSuccess(BaseModel):
 class NewEvent(ORMModel):
     name: str
     price: int = 0
-    venue_id: str | uuid.UUID
+    venue_id: ObjectId
     date: datetime.datetime
     artists: list[Artist]
     tickets: list[Ticket]

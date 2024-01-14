@@ -4,8 +4,9 @@ from ui.server_connections import authentication, database
 from ui.server_connections.database import get_database
 
 
-authentication.authorize()
 connection = database.init_db_and_get_connection()
+current_user_email = authentication.authorize(connection)
+
 
 with connection.session as session:
     db = get_database(session)

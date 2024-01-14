@@ -10,7 +10,7 @@ def check_auth_and_login():
     st.stop()
 
 
-def display_login():
+def display_login(connection):
     with st.form("user-details"):
         email = st.text_input("email:")
         password = st.text_input("password: ", type="password")
@@ -19,7 +19,6 @@ def display_login():
             if email == "admin":
                 return backend.auth.authenticate(email, password)
             try:
-                connection = database.init_db_and_get_connection()
                 with connection.session as session:
                     db = database.get_database(session)
                     user = db.get_user_by_email(email)

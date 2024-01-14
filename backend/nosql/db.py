@@ -62,24 +62,58 @@ class MongoDatabase(backend.database.Database):
         return [schemas.Event.model_validate(event) for event in self.events.find()]
 
     def get_top_users_for_venue(self, venue_id) -> list[schemas.VenueReport]:
-        pass
+        connect_with_user = {
+            '$lookup': {
+                'from': 'users',
+                'localField': 'tickets.user_id',
+                'foreignField': '_id',
+                'as': 'user'
+            }
+        }
+        group_by_user = {
+            '$group': {
+                '_id': '$user._id',
+                'tickets': {
+                    '$sum': 1
+                },
+                'user': {
+                    '$addToSet': '$user'
+                }
+            }
+        }
+        cursor = self.events.aggregate([
+            {'$match': {'venue_id': to_object_id(venue_id)}},
+            {'$unwind': '$tickets'},
+            connect_with_user,
+            {'$unwind': '$user'},
+            group_by_user,
+            {'$unwind': '$user'}
+        ])
+        return [schemas.VenueReport(
+            user=schemas.User.model_validate(co['user']),
+            tickets_purchased=co['tickets']
+        ) for co in cursor]
 
     def get_user_by_email(self, user_name: str) -> schemas.User:
-        pass
+        # TODO
+        user = self.users.find_one({'email': user_name})
+        return schemas.User.model_validate(user)
 
     def add_ticket(self, ticket: schemas.NewTicket) -> schemas.Ticket:
+        ticket_dict = ticket.model_dump(by_alias=True)
+        ticket_dict['user_id'] = ObjectId(ticket_dict['user_id'])
         self.events.update_one({
             '_id': to_object_id(ticket.event_id)},
-            {'$push': {'tickets': ticket.model_dump(by_alias=True)}
+            {'$push': {'tickets': ticket_dict}
              })
         return self.get_ticket(ticket.user_id, ticket.event_id)
 
-    def get_ticket(self, user_id: str, event_id: str) -> schemas.Ticket | None:
+    def get_ticket(self, user_id: str, event_id: str | ObjectId) -> schemas.Ticket | None:
         event = self.events.find_one(
-            {'_id': to_object_id(event_id), 'tickets.user_id': user_id})
+            {'_id': to_object_id(event_id), 'tickets.user_id': to_object_id(user_id)})
         if event is None:
             return event
-        ticket = next(ticket for ticket in event["tickets"] if ticket["user_id"] == user_id)
+        ticket = next(ticket for ticket in event["tickets"] if str(ticket["user_id"]) == user_id)
         return schemas.Ticket.model_validate(ticket)
 
     def return_ticket(self, user_id, event_id):
@@ -105,7 +139,9 @@ class MongoDatabase(backend.database.Database):
         pass
 
     def add_event(self, event: schemas.NewEvent):
-        event_id = self.events.insert_one(event.model_dump(by_alias=True)).inserted_id
+        event_dict = event.model_dump(by_alias=True)
+        event_dict['venue_id'] = to_object_id(event_dict['venue_id'])
+        event_id = self.events.insert_one(event_dict).inserted_id
         return schemas.Event.model_validate(self.get_event(event_id))
 
     def add_venue(self, venue: schemas.NewVenue):

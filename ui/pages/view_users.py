@@ -3,8 +3,8 @@ import streamlit as st
 from ui.server_connections import authentication, database
 from ui.server_connections.database import get_database
 
-current_user_email = authentication.authorize()
 connection = database.init_db_and_get_connection()
+current_user_email = authentication.authorize(connection)
 
 
 if current_user_email != 'admin':

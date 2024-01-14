@@ -9,8 +9,8 @@ from ui.server_connections import authentication, database
 from ui.server_connections.database import get_database
 
 
-current_user_email = authentication.authorize()
 connection = database.init_db_and_get_connection()
+current_user_email = authentication.authorize(connection)
 
 
 def display_buy_ticket(user_id: str):

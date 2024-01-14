@@ -11,8 +11,8 @@ from ui.server_connections import authentication, database
 from ui.server_connections.database import get_database
 
 
-user_email= authentication.authorize()
 connection = database.init_db_and_get_connection()
+current_user_email = authentication.authorize(connection)
 
 
 def display_cancel_ticket(user_id, event_id):
@@ -29,7 +29,7 @@ def display_cancel_ticket(user_id, event_id):
 
 with connection.session as session:
     db = get_database(session)
-    user = db.get_user_by_email(user_email)
+    user = db.get_user_by_email(current_user_email)
     user_tickets = db.get_tickets_for_user(user.id)
     venues = db.get_venues()
 

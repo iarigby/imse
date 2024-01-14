@@ -24,3 +24,7 @@ def main():
         my_sql_table = Table(DbTable.__tablename__, metadata_obj, autoload_with=engine)
 
         print(CreateTable(my_sql_table).compile(engine))
+
+
+if __name__ == '__main__':
+    main()
