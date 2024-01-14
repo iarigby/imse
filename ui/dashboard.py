@@ -3,7 +3,7 @@ from time import sleep
 import streamlit as st
 
 from ui.server_connections import database, authentication, tasks
-from ui.server_connections.database import reset_database
+from ui.server_connections.database import reset_database, Keys, current_database, set_database
 
 connection = database.init_db_and_get_connection()
 authentication.authorize(connection)
@@ -38,6 +38,8 @@ with cols[3]:
         with st.spinner("migrating database, please wait"):
             while not migration_task.ready():
                 sleep(1)
-            st.write(migration_task.get())
             if st.button("flush redis"):
                 tasks.remove_migration_info()
+            st.write(migration_task.get())
+            if current_database() != Keys.db_mongo:
+                set_database(Keys.db_mongo)

@@ -44,6 +44,7 @@ def migrate():
     # on other pages check if session variable is changed. Eventually
     # the dashboard function will change it and pages will be reloaded
     mongo_client = MongoDatabase.database()
+    MongoDatabase.reset(mongo_client)
     mongo_db = MongoDatabase(mongo_client)
     engine = SqlDatabase.engine()
     SessionMaker = SqlDatabase.database(engine)

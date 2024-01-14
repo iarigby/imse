@@ -74,4 +74,6 @@ def current_database():
 
 
 def set_database(val: str):
+    os.environ[Keys.session_db_key] = val
     st.session_state[Keys.session_db_key] = val
+    st.rerun()
