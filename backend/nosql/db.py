@@ -95,7 +95,6 @@ class MongoDatabase(backend.database.Database):
         ) for co in cursor]
 
     def get_user_by_email(self, user_name: str) -> schemas.User:
-        # TODO
         user = self.users.find_one({'email': user_name})
         return schemas.User.model_validate(user)
 
