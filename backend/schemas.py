@@ -1,9 +1,12 @@
 import datetime
 import uuid
+from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, BeforeValidator
+from pydantic import BaseModel, ConfigDict, Field, BeforeValidator, field_validator, model_validator
 from typing_extensions import Annotated
 from bson import ObjectId as _ObjectId
+
+from backend.sql import models
 
 
 def check_object_id(value):
@@ -47,6 +50,14 @@ class NewTicket(ORMModel):
 
 class Ticket(NewTicket):
     id: ObjectId = Field(alias='_id')
+
+    @model_validator(mode='before')
+    def check_card_number_omitted(cls, data: Any) -> Any:
+        if type(data) == models.Ticket:
+            return data
+        if '_id' not in data:
+            data['_id'] = data['event_id'] + data['user_id']
+        return data
 
 
 class NewArtist(ORMModel):

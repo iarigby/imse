@@ -3,10 +3,17 @@ from __future__ import annotations
 import os
 from contextlib import contextmanager
 
+from bson import ObjectId
 from pymongo.mongo_client import MongoClient
 
 import backend.database
 from backend import schemas
+
+
+def to_object_id(item_id: str | ObjectId):
+    if type(item_id) == str:
+        return ObjectId(item_id)
+    return item_id
 
 
 class MongoDatabase(backend.database.Database):
@@ -37,8 +44,9 @@ class MongoDatabase(backend.database.Database):
         users = self.client.imse.users.find()
         return [schemas.User.model_validate(user) for user in users]
 
-    def add_user(self, user: schemas.NewUser):
-        self.client.imse.users.insert_one(user.model_dump())
+    def add_user(self, user: schemas.NewUser) -> schemas.User:
+        user_id = self.client.imse.users.insert_one(user.model_dump(by_alias=True)).inserted_id
+        return schemas.User.model_validate(self.get_user(user_id))
 
     def add_artist(self, artist: schemas.NewArtist):
         pass
@@ -60,6 +68,10 @@ class MongoDatabase(backend.database.Database):
 
     def add_ticket(self, ticket: schemas.NewTicket):
         pass
+        self.client.imse.events.update_one({
+            '_id': to_object_id(ticket.event_id)},
+            {'$push': {'tickets': ticket.model_dump(by_alias=True)}
+             })
 
     def get_ticket(self, ticket_id: str) -> schemas.Ticket:
         pass
@@ -71,7 +83,8 @@ class MongoDatabase(backend.database.Database):
         return [schemas.Ticket.model_validate(ticket) for ticket in self.client.imse.tickets.find()]
 
     def get_event(self, event_id: str):
-        pass
+        event = self.client.imse.events.find_one({'_id': to_object_id(event_id)})
+        return schemas.Event.model_validate(event)
 
     def decrease_user_balance(self, user_id: str, amount: int):
         pass
@@ -83,13 +96,16 @@ class MongoDatabase(backend.database.Database):
         pass
 
     def add_event(self, event: schemas.NewEvent):
-        pass
+        event_id = self.client.imse.events.insert_one(event.model_dump(by_alias=True)).inserted_id
+        return schemas.Event.model_validate(self.get_event(event_id))
 
     def add_venue(self, venue: schemas.NewVenue):
-        pass
+        venue_id = self.client.imse.venues.insert_one(venue.model_dump(by_alias=True)).inserted_id
+        return schemas.Venue.model_validate(self.get_venue(venue_id))
 
     def get_venue(self, venue_id: str):
-        pass
+        venue = self.client.imse.venues.find_one({'_id': venue_id})
+        return schemas.Venue.model_validate(venue)
 
     def get_venues(self):
         return [schemas.Venue.model_validate(venue) for venue in self.client.imse.venues.find()]

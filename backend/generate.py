@@ -36,11 +36,11 @@ def event(venue_id: str | uuid.UUID,
 
 
 def ticket(user_id: str | uuid.UUID,
-           event_id: str | uuid.UUID) -> schemas.NewEvent:
-    return schemas.NewEvent(purchase_date=fake.past_date(),
-                            status=random.choice(['purchased', 'cancelled']),
-                            user_id=user_id,
-                            event_id=event_id)
+           event_id: str | uuid.UUID) -> schemas.NewTicket:
+    return schemas.NewTicket(purchase_date=fake.past_datetime().replace(microsecond=0),
+                             status=random.choice(['purchased', 'cancelled']),
+                             user_id=user_id,
+                             event_id=event_id)
 
 
 def artist() -> schemas.NewArtist:

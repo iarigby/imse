@@ -59,7 +59,7 @@ class Database(ABC):
         pass
 
     @abstractmethod
-    def get_tickets(self):
+    def get_tickets(self) -> list[schemas.Ticket]:
         pass
 
     @abstractmethod
