@@ -84,7 +84,7 @@ class MongoDatabase(backend.database.Database):
         pass
 
     def get_tickets(self) -> list[schemas.Ticket]:
-        pass
+        return [ticket for event in self.get_events() for ticket in event.tickets]
 
     def get_event(self, event_id: str):
         event = self.events.find_one({'_id': to_object_id(event_id)})
@@ -122,9 +122,6 @@ class MongoDatabase(backend.database.Database):
 
     def add_events(self, events: list[schemas.Event]):
         self.events.insert_many([event.model_dump(by_alias=True) for event in events])
-
-    def add_tickets(self, tickets: list[schemas.Ticket]):
-        pass
 
     @property
     def events(self) -> pymongo.collection.Collection:

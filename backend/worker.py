@@ -51,7 +51,6 @@ def migrate():
         mongo_db.add_users(sql_db.get_users())
         mongo_db.add_venues(sql_db.get_venues())
         mongo_db.add_events(sql_db.get_events())
-        mongo_db.add_tickets(sql_db.get_tickets())
     return "migration completed"
 
 
