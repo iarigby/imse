@@ -15,6 +15,10 @@ class OutOfSpaceError(BaseException):
     pass
 
 
+class UserAlreadyHasTicket(BaseException):
+    pass
+
+
 class LateCancelation(BaseException):
     pass
 
@@ -26,6 +30,8 @@ class EventService:
         self.db = db
 
     def buy_ticket(self, user_id: str, event_id: str):
+        if self.db.get_ticket(user_id, event_id) is not None:
+            raise UserAlreadyHasTicket()
         ticket = schemas.NewTicket(
             purchase_date=datetime.datetime.now(),
             status='booked',

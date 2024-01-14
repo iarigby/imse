@@ -55,7 +55,7 @@ class Database(ABC):
         pass
 
     @abstractmethod
-    def get_ticket(self, ticket_id: str) -> schemas.Ticket:
+    def get_ticket(self, user_id: str, event_id: str) -> schemas.Ticket:
         pass
 
     @abstractmethod

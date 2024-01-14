@@ -66,21 +66,24 @@ class MongoDatabase(backend.database.Database):
     def get_user_by_email(self, user_name: str) -> schemas.User:
         pass
 
-    def add_ticket(self, ticket: schemas.NewTicket):
-        pass
+    def add_ticket(self, ticket: schemas.NewTicket) -> schemas.Ticket:
         self.client.imse.events.update_one({
             '_id': to_object_id(ticket.event_id)},
             {'$push': {'tickets': ticket.model_dump(by_alias=True)}
              })
+        return self.get_ticket(ticket.user_id, ticket.event_id)
 
-    def get_ticket(self, ticket_id: str) -> schemas.Ticket:
-        pass
+    def get_ticket(self, user_id: str, event_id: str) -> schemas.Ticket:
+        event = self.client.imse.events.find_one(
+            {'_id': to_object_id(event_id), 'tickets.user_id': user_id})
+        ticket = next(ticket for ticket in event["tickets"] if ticket["user_id"] == user_id)
+        return schemas.Ticket.model_validate(ticket)
 
     def del_ticket(self, ticket: schemas.Ticket.id):
         pass
 
     def get_tickets(self) -> list[schemas.Ticket]:
-        return [schemas.Ticket.model_validate(ticket) for ticket in self.client.imse.tickets.find()]
+        pass
 
     def get_event(self, event_id: str):
         event = self.client.imse.events.find_one({'_id': to_object_id(event_id)})
@@ -120,4 +123,4 @@ class MongoDatabase(backend.database.Database):
         self.client.imse.events.insert_many([event.model_dump(by_alias=True) for event in events])
 
     def add_tickets(self, tickets: list[schemas.Ticket]):
-        self.client.imse.tickets.insert_many([ticket.model_dump(by_alias=True) for ticket in tickets])
+        pass

@@ -2,7 +2,7 @@ import datetime
 import uuid
 from typing import List
 
-from sqlalchemy import ForeignKey, Column, Table
+from sqlalchemy import ForeignKey, Column, Table, PrimaryKeyConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 
 
@@ -29,7 +29,7 @@ class User(Base):
 
 class Ticket(Base):
     __tablename__ = "ticket"
-    _id: Mapped[uuid.UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
+    # _id: Mapped[uuid.UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
     event_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("event._id"), nullable=False)
     event: Mapped["Event"] = relationship(back_populates="tickets")
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user._id"), nullable=False)
@@ -38,9 +38,14 @@ class Ticket(Base):
     status: Mapped[str] = mapped_column(nullable=False, default='booked')
 
     @property
-    def id(self):
-        return self._id
+    def _id(self):
+        return str(self.user_id) + str(self.event_id)
 
+    __table_args__ = (
+        PrimaryKeyConstraint(
+            user_id, event_id
+        ),
+    )
 
 class Venue(Base):
     __tablename__ = "venue"

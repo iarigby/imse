@@ -44,3 +44,5 @@ def populate_database(db: Database, config: Config = default_config):
                     pass
                 except services.OutOfBalanceError:
                     pass
+                except services.UserAlreadyHasTicket:
+                    pass

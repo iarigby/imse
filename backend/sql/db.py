@@ -129,12 +129,14 @@ class SqlDatabase(backend.database.Database):
     def get_tickets(self) -> list[schemas.Ticket]:
         return [schemas.Ticket.model_validate(t) for t in self.db.query(models.Ticket).all()]
 
-    def get_ticket(self, ticket_id: str) -> schemas.Ticket:
+    def get_ticket(self, user_id: str, event_id: str) -> schemas.Ticket | None:
         ticket = (self.db.query(models.Ticket)
-                  .filter_by(_id=ticket_id)
+                  .filter_by(user_id=user_id, event_id=event_id)
                   .join(models.Event, isouter=True)
                   .join(models.User, isouter=True)
                   .one_or_none())
+        if not ticket:
+            return ticket
         return schemas.Ticket.model_validate(ticket)
 
     def del_ticket(self, ticket_id):
