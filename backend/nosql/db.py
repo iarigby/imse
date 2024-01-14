@@ -38,7 +38,7 @@ class MongoDatabase(backend.database.Database):
         client.drop_database('imse')
 
     def get_user(self, user_id: str) -> schemas.User:
-        user = self.users.find_one({'_id': user_id})
+        user = self.users.find_one({'_id': to_object_id(user_id)})
         return schemas.User.model_validate(user)
 
     def get_users(self) -> list[schemas.User]:
@@ -74,13 +74,15 @@ class MongoDatabase(backend.database.Database):
              })
         return self.get_ticket(ticket.user_id, ticket.event_id)
 
-    def get_ticket(self, user_id: str, event_id: str) -> schemas.Ticket:
+    def get_ticket(self, user_id: str, event_id: str) -> schemas.Ticket | None:
         event = self.events.find_one(
             {'_id': to_object_id(event_id), 'tickets.user_id': user_id})
+        if event is None:
+            return event
         ticket = next(ticket for ticket in event["tickets"] if ticket["user_id"] == user_id)
         return schemas.Ticket.model_validate(ticket)
 
-    def return_ticket(self, ticket: schemas.Ticket.id):
+    def return_ticket(self, user_id, event_id):
         pass
 
     def get_tickets(self) -> list[schemas.Ticket]:
@@ -92,8 +94,10 @@ class MongoDatabase(backend.database.Database):
 
     def decrease_user_balance(self, user_id: str, amount: int):
         pass
+
     def increase_user_balance(self, user_id: str, amount: int):
         pass
+
     def get_events_with_tickets(self) -> list[schemas.Event]:
         pass
 
@@ -109,7 +113,7 @@ class MongoDatabase(backend.database.Database):
         return schemas.Venue.model_validate(self.get_venue(venue_id))
 
     def get_venue(self, venue_id: str):
-        venue = self.venues.find_one({'_id': venue_id})
+        venue = self.venues.find_one({'_id': to_object_id(venue_id)})
         return schemas.Venue.model_validate(venue)
 
     def get_venues(self):
