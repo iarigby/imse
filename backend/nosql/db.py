@@ -80,7 +80,7 @@ class MongoDatabase(backend.database.Database):
         ticket = next(ticket for ticket in event["tickets"] if ticket["user_id"] == user_id)
         return schemas.Ticket.model_validate(ticket)
 
-    def del_ticket(self, ticket: schemas.Ticket.id):
+    def return_ticket(self, ticket: schemas.Ticket.id):
         pass
 
     def get_tickets(self) -> list[schemas.Ticket]:
@@ -92,7 +92,8 @@ class MongoDatabase(backend.database.Database):
 
     def decrease_user_balance(self, user_id: str, amount: int):
         pass
-
+    def increase_user_balance(self, user_id: str, amount: int):
+        pass
     def get_events_with_tickets(self) -> list[schemas.Event]:
         pass
 
@@ -122,6 +123,9 @@ class MongoDatabase(backend.database.Database):
 
     def add_events(self, events: list[schemas.Event]):
         self.events.insert_many([event.model_dump(by_alias=True) for event in events])
+
+    def get_tickets_for_user(self, user_id) -> list[schemas.UserTicket]:
+        pass
 
     @property
     def events(self) -> pymongo.collection.Collection:

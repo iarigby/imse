@@ -70,6 +70,12 @@ class SqlDatabase(backend.database.Database):
             {models.User.balance: models.User.balance - amount})
         self.db.commit()
 
+    def increase_user_balance(self, user_id: str, amount: int):
+        self.db.query(models.User).filter_by(_id=user_id).update(
+            {models.User.balance: models.User.balance + amount}
+        )
+        self.db.commit()
+
     def add_venue(self, venue: schemas.NewVenue) -> schemas.Venue:
         db_venue = models.Venue(**venue.model_dump())
         self.db.add(db_venue)
@@ -112,7 +118,7 @@ class SqlDatabase(backend.database.Database):
         self.db.commit()
 
     def get_artists(self) -> list[schemas.Artist]:
-        return [schemas.Artist.model_validate(t) for t in self.db.query(models.Ticket).all()]
+        return [schemas.Artist.model_validate(t) for t in self.db.query(models.Artist).all()]
 
     def get_artist(self, artist_id: str) -> schemas.Artist:
         artist = (self.db.query(models.Artist)
@@ -139,15 +145,16 @@ class SqlDatabase(backend.database.Database):
             return ticket
         return schemas.Ticket.model_validate(ticket)
 
-    def del_ticket(self, ticket_id):
-        ticket = (self.db.query(models.Ticket)
-                  .filter_by(_id=ticket_id)
-                  .join(models.User, isouter=True)
-                  .join(models.Event, isouter=True)
-                  .one_or_none())
-        self.db.delete(ticket)
+    def return_ticket(self, user_id, event_id):
+        (self.db.query(models.Ticket)
+                  .filter_by(user_id=user_id, event_id=event_id).update({models.Ticket.status: "cancelled"}))
         self.db.commit()
         return
+
+    def get_tickets_for_user(self, user_id) -> list[schemas.UserTicket]:
+        tickets = self.db.query(models.Ticket).filter_by(user_id=user_id).join(models.Event).all()
+        return [schemas.UserTicket(ticket=schemas.Ticket.model_validate(ticket),
+                                   event=schemas.Event.model_validate(ticket.event)) for ticket in tickets]
 
     # need to add date
     def get_top_users_for_venue(self, venue_id) -> list[schemas.VenueReport]:

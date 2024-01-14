@@ -51,7 +51,7 @@ class Database(ABC):
         pass
 
     @abstractmethod
-    def del_ticket(self, ticket: schemas.Ticket.id):
+    def return_ticket(self, user_id: str, event_id: str):
         pass
 
     @abstractmethod
@@ -79,6 +79,10 @@ class Database(ABC):
         pass
 
     @abstractmethod
+    def increase_user_balance(self, user_id: str, amount: int):
+        pass
+
+    @abstractmethod
     def add_event(self, event: schemas.NewEvent) -> schemas.Event:
         pass
 
@@ -92,6 +96,10 @@ class Database(ABC):
 
     @abstractmethod
     def get_venues(self):
+        pass
+
+    @abstractmethod
+    def get_tickets_for_user(self, user_id) -> list[schemas.UserTicket]:
         pass
 
     @abstractmethod

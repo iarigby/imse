@@ -26,6 +26,14 @@ def populate_database(db: Database, config: Config = default_config):
     fixed_user1.first_name = "Barbara"
     fixed_user1.last_name = "Dalton"
     fixed_user1.balance = 200
+
+    admin_user = generate.user()
+    admin_user.email = "admin"
+    admin_user.password = "sample_password"
+    admin_user.first_name = "admin"
+    admin_user.last_name = "admin"
+    admin_user.balance = 200
+    db.add_user(admin_user)
     db.add_user(fixed_user1)
     for user in range(config.users):
         db.add_user(generate.user())

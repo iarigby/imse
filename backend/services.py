@@ -51,15 +51,16 @@ class EventService:
         self.db.add_ticket(ticket)
         self.db.decrease_user_balance(user_id, event.price)
 
-    def cancel_ticket(self, ticket_id: str):
-        ticket = self.db.get_ticket(ticket_id)
+    def cancel_ticket(self, user_id: str, event_id: str):
+        ticket = self.db.get_ticket(user_id, event_id)
         event = self.db.get_event(event_id=ticket.event_id)
         event_date = event.date
-        current_date = datetime.now()
-        two_weeks_ago = event_date - timedelta(weeks=2)
+        current_date = datetime.datetime.now()
+        two_weeks_ago = event_date - timedelta.Timedelta(weeks=2)
         if current_date > two_weeks_ago:
             raise LateCancelation()
-        self.db.del_ticket(ticket_id)
+        self.db.return_ticket(user_id, event_id)
+        self.db.increase_user_balance(user_id, event.price)
 
         # self.db.add_ticket(ticket)
 

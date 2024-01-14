@@ -97,3 +97,8 @@ class NewVenue(ORMModel):
 
 class Venue(NewVenue):
     id: ObjectId = Field(alias='_id')
+
+
+class UserTicket(BaseModel):
+    ticket: Ticket
+    event: Event
