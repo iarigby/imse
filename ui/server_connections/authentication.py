@@ -12,7 +12,7 @@ user_id_key = 'user_email'
 def authorize(connection):
     cookies = CookieManager(key='a')
     current_user_email = cookies.get(user_id_key)
-    if not current_user_email:
+    if current_user_email is None:
         user_email = display_login(connection)
         if user_email is None:
             st.stop()

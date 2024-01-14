@@ -100,7 +100,7 @@ class MongoDatabase(backend.database.Database):
 
     def add_ticket(self, ticket: schemas.NewTicket) -> schemas.Ticket:
         ticket_dict = ticket.model_dump(by_alias=True)
-        ticket_dict['user_id'] = ObjectId(ticket_dict['user_id'])
+        ticket_dict['user_id'] = ObjectId(str(ticket_dict['user_id']))
         self.events.update_one({
             '_id': to_object_id(ticket.event_id)},
             {'$push': {'tickets': ticket_dict}
@@ -112,7 +112,7 @@ class MongoDatabase(backend.database.Database):
             {'_id': to_object_id(event_id), 'tickets.user_id': to_object_id(user_id)})
         if event is None:
             return event
-        ticket = next(ticket for ticket in event["tickets"] if str(ticket["user_id"]) == user_id)
+        ticket = next(ticket for ticket in event["tickets"] if str(ticket["user_id"]) == str(user_id))
         return schemas.Ticket.model_validate(ticket)
 
     def return_ticket(self, user_id, event_id):
@@ -164,7 +164,26 @@ class MongoDatabase(backend.database.Database):
         self.events.insert_many([event.model_dump(by_alias=True) for event in events])
 
     def get_tickets_for_user(self, user_id) -> list[schemas.UserTicket]:
-        pass
+        connect_with_user = {
+            '$lookup': {
+                'from': 'users',
+                'localField': 'tickets.user_id',
+                'foreignField': '_id',
+                'as': 'user'
+            }
+        }
+        cursor = self.events.aggregate(
+            [{'$unwind': '$tickets'},
+             connect_with_user,
+             {'$match': {'user._id': to_object_id(user_id)}}, ])
+
+        def create_response(co):
+            ticket = schemas.Ticket.model_validate(co['tickets'])
+            co['tickets'] = []
+            return schemas.UserTicket(ticket=ticket,
+                                      event=schemas.Event.model_validate(co))
+
+        return [create_response(co) for co in cursor]
 
     @property
     def events(self) -> pymongo.collection.Collection:

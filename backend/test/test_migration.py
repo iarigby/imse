@@ -30,7 +30,7 @@ def test_migration():
         sql_service.buy_ticket(user.id, random.choice(events).id)
 
         tickets: list[schemas.Ticket] = sql_db.get_tickets()
-        user_tickets = [ticket for ticket in tickets if ticket.user_id == user.id]
+        user_tickets = sql_db.get_tickets_for_user(user.id)
     migrate()
     mongo_db = MongoDatabase(mongo_client)
     migrated_users = mongo_db.get_users()
@@ -38,9 +38,10 @@ def test_migration():
     migrated_venues = mongo_db.get_venues()
     migrated_tickets = mongo_db.get_tickets()
     migrated_user = mongo_db.get_user(user.id)
-    migrated_user_tickets = [ticket for ticket in tickets if ticket.user_id == migrated_user.id]
+    migrated_user_tickets = mongo_db.get_tickets_for_user(migrated_user.id)
     assert len(migrated_user_tickets) != 0
-    assert(sorted(ticket.id for ticket in user_tickets) == sorted(ticket.id for ticket in migrated_user_tickets))
+    assert (sorted(user_ticket.ticket.id for user_ticket in user_tickets) == sorted(
+        user_ticket.ticket.id for user_ticket in migrated_user_tickets))
     assert len(users) == len(migrated_users)
     assert len(venues) == len(migrated_venues)
     assert len(events) == len(migrated_events)
