@@ -6,22 +6,26 @@ from ui.server_connections import database, authentication, tasks
 from ui.server_connections.database import reset_database
 
 connection = database.init_db_and_get_connection()
-authentication.authorize(connection)
 
 
 st.title("Database Dashboard")
 
 cols = st.columns(4)
 
+with cols[2]:
+    if st.button("Reset/populate Database"):
+        with connection.session as session:
+            reset_database()
+
+
+authentication.authorize(connection)
+
+
 with cols[0]:
     st.write("current database is " + database.current_database())
 with cols[1]:
     st.button("Switch Database", on_click=database.switch_database)
 
-with cols[2]:
-    if st.button("Reset/populate Database"):
-        with connection.session as session:
-            reset_database()
 
 with cols[3]:
     with st.spinner("trying to connect to redis to fetch migration tasks"):
