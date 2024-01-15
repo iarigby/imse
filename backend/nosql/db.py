@@ -121,7 +121,8 @@ class MongoDatabase(backend.database.Database):
         pass
 
     def get_tickets(self) -> list[schemas.Ticket]:
-        return [ticket for event in self.get_events() for ticket in event.tickets]
+        cursor = self.events.aggregate([{'$unwind': '$tickets'}])
+        return [schemas.Ticket.model_validate(event['tickets']) for event in cursor]
 
     def get_event(self, event_id: str):
         event = self.events.find_one({'_id': to_object_id(event_id)})
