@@ -126,7 +126,10 @@ class MongoDatabase(backend.database.Database):
         return schemas.Event.model_validate(event)
 
     def decrease_user_balance(self, user_id: str, amount: int):
-        pass
+        self.users.update_one({
+            '_id': to_object_id(user_id)},
+            {'$inc': {'balance': -1*amount}
+             })
 
     def increase_user_balance(self, user_id: str, amount: int):
         pass
