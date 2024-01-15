@@ -5,11 +5,6 @@ import backend.auth
 from ui.server_connections import database
 
 
-def check_auth_and_login():
-    display_login()
-    st.stop()
-
-
 def display_login(connection):
     with st.form("user-details"):
         email = st.text_input("email:")

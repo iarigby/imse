@@ -3,6 +3,7 @@ from time import sleep
 import streamlit as st
 
 from ui.server_connections import database, authentication, tasks
+from ui.server_connections.authentication import logout
 from ui.server_connections.database import reset_database
 
 connection = database.init_db_and_get_connection()
@@ -16,6 +17,8 @@ with cols[2]:
     if st.button("Reset/populate Database"):
         with connection.session as session:
             reset_database()
+            logout()
+            st.rerun()
 
 
 authentication.authorize(connection)
