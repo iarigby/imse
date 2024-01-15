@@ -8,6 +8,7 @@ from bson import ObjectId
 from pymongo.mongo_client import MongoClient
 
 import backend.database
+from backend.database import OrderBy
 from backend import schemas
 
 
@@ -61,7 +62,7 @@ class MongoDatabase(backend.database.Database):
     def get_events(self):
         return [schemas.Event.model_validate(event) for event in self.events.find()]
 
-    def get_top_users_for_venue(self, venue_id) -> list[schemas.VenueReport]:
+    def get_top_users_for_venue(self, venue_id, order_by: OrderBy) -> list[schemas.VenueReport]:
         connect_with_user = {
             '$lookup': {
                 'from': 'users',
@@ -87,7 +88,8 @@ class MongoDatabase(backend.database.Database):
             connect_with_user,
             {'$unwind': '$user'},
             group_by_user,
-            {'$unwind': '$user'}
+            {'$unwind': '$user'},
+            {'$sort': {'tickets': order_by.value}}
         ])
         return [schemas.VenueReport(
             user=schemas.User.model_validate(co['user']),

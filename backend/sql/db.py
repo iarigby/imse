@@ -4,10 +4,11 @@ import os
 from contextlib import contextmanager
 from typing import Type
 
-from sqlalchemy import create_engine, StaticPool
+from sqlalchemy import create_engine, StaticPool  # func, select, text
 from sqlalchemy.orm import sessionmaker, Session
 
 import backend.database
+from backend.database import OrderBy
 from backend.sql import models
 from backend import schemas
 
@@ -147,7 +148,7 @@ class SqlDatabase(backend.database.Database):
 
     def return_ticket(self, user_id, event_id):
         (self.db.query(models.Ticket)
-                  .filter_by(user_id=user_id, event_id=event_id).update({models.Ticket.status: "cancelled"}))
+         .filter_by(user_id=user_id, event_id=event_id).update({models.Ticket.status: "cancelled"}))
         self.db.commit()
         return
 
@@ -157,7 +158,23 @@ class SqlDatabase(backend.database.Database):
                                    event=schemas.Event.model_validate(ticket.event)) for ticket in tickets]
 
     # need to add date
-    def get_top_users_for_venue(self, venue_id) -> list[schemas.VenueReport]:
+    def get_top_users_for_venue(self, venue_id, order_by: OrderBy) -> list[schemas.VenueReport]:
+        # match order_by:
+        #     case OrderBy.Ascending:
+        #         order = 'ASC'
+        #     case _:
+        #         order = 'DESC'
+        # stmt = (select(models.User, func.count(models.User.tickets).label('ticket_count'))
+        #         .join(models.Ticket)
+        #         .join(models.Event)
+        #         .filter(models.Event.venue_id == venue_id)
+        #         .order_by(text('ticket_count ' + order))
+        #         .group_by(models.User))
+        #
+        # stmt = self.db.execute(stmt)
+        # return [schemas.VenueReport(user=schemas.User.model_validate(user),
+        #                             tickets_purchased=ticket_count
+        #                             ) for [user, ticket_count] in stmt]
         users: list[Type[models.User]] = (self.db.query(models.User)
                                           .join(models.Ticket)
                                           .join(models.Event)
@@ -166,3 +183,4 @@ class SqlDatabase(backend.database.Database):
         return [schemas.VenueReport(user=schemas.User.model_validate(user),
                                     tickets_purchased=len(user.tickets)
                                     ) for user in users]
+

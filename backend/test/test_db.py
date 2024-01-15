@@ -2,6 +2,7 @@ import contextlib
 from typing import ContextManager
 
 from backend import generate, services, schemas
+from backend.database import OrderBy
 import pytest
 
 from .setup import SessionMaker
@@ -81,8 +82,11 @@ def test_get_top_users_for_venue(db_session):
         service.buy_ticket(user1.id, event2.id)
         service.buy_ticket(user2.id, event1.id)
         service.buy_ticket(user2.id, event3.id)
-        reports1 = db.get_top_users_for_venue(venue1.id)
-        reports2 = db.get_top_users_for_venue(venue2.id)
+        reports1 = db.get_top_users_for_venue(venue1.id, OrderBy.Ascending)
+        reports2 = db.get_top_users_for_venue(venue2.id, OrderBy.Ascending)
+        assert len(reports1) == 2
+        assert len(reports2) == 1
+    # assert reports1 == sorted(reports1, key=lambda r: r.tickets_purchased, reverse=True)
 
     def find_user(reports, user_id) -> schemas.VenueReport:
         return next(report for report in reports if report.user.id == user_id)

@@ -2,8 +2,14 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
+from enum import Enum
 
 from backend import schemas
+
+
+class OrderBy(Enum):
+    Descending = -1
+    Ascending = 1
 
 
 class Database(ABC):
@@ -103,7 +109,7 @@ class Database(ABC):
         pass
 
     @abstractmethod
-    def get_top_users_for_venue(self, venue_id) -> list[schemas.VenueReport]:
+    def get_top_users_for_venue(self, venue_id: str, order_by: OrderBy) -> list[schemas.VenueReport]:
         pass
 
     @abstractmethod
