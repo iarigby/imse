@@ -17,8 +17,6 @@ class Keys:
 
 
 def init_db_and_get_connection():
-    if Keys.session_db_key not in st.session_state:
-        set_database(os.environ.get(Keys.session_db_key, Keys.db_sql))
     connection = get_connection()
     return connection
 
@@ -70,6 +68,8 @@ def switch_database():
 
 
 def current_database():
+    if Keys.session_db_key not in st.session_state:
+        set_database(os.environ.get(Keys.session_db_key, Keys.db_sql))
     return st.session_state[Keys.session_db_key]
 
 
