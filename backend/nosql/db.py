@@ -135,7 +135,11 @@ class MongoDatabase(backend.database.Database):
         return schemas.Ticket.model_validate(ticket)
 
     def return_ticket(self, user_id, event_id):
-        pass
+        self.events.update_one(
+            {'_id': event_id, 'tickets.user_id': user_id},
+            {'$set': {'tickets.$.status': 'cancelled'}}
+        )
+        return
 
     def get_tickets(self) -> list[schemas.Ticket]:
         cursor = self.events.aggregate([{'$unwind': '$tickets'}])
@@ -156,15 +160,6 @@ class MongoDatabase(backend.database.Database):
             '_id': to_object_id(user_id)},
             {'$inc': {'balance': amount}
              })
-
-    def return_ticket(self, user_id, event_id):
-        pass
-        # self.tickets.update_one(
-        #     {'user_id': user_id, 'event_id': event_id},
-        #     {'$set': {'status': 'cancelled'}}
-        # )
-        # return
-
 
     def get_events_with_tickets(self) -> list[schemas.Event]:
         pass
