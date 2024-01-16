@@ -19,16 +19,16 @@ with connection.session as session:
     db = get_database(session)
     artist_info = db.get_artist_info(selected_artist.id)
 
-    report_columns = st.columns(4)
+    report_columns = st.columns(3)
+    # with report_columns[0]:
+    #     st.subheader("Name")
+    #     st.write(artist_info.artist_name)
     with report_columns[0]:
-        st.subheader("Name")
-        st.write(artist_info.artist_name)
-    with report_columns[1]:
         st.subheader("Events")
         st.write(artist_info.number_of_events)
-    with report_columns[2]:
+    with report_columns[1]:
         st.subheader("Booked tickets")
         st.write(artist_info.number_of_booked_tickets)
-    with report_columns[3]:
+    with report_columns[2]:
         st.subheader("Cancelled tickets")
         st.write(artist_info.number_of_cancelled_tickets)

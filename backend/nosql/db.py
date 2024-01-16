@@ -154,7 +154,7 @@ class MongoDatabase(backend.database.Database):
     def decrease_user_balance(self, user_id: str, amount: int):
         self.users.update_one({
             '_id': to_object_id(user_id)},
-            {'$inc': {'balance': -1*amount}
+            {'$inc': {'balance': -1 * amount}
              })
 
     def increase_user_balance(self, user_id: str, amount: int):
@@ -227,74 +227,31 @@ class MongoDatabase(backend.database.Database):
             {'$unwind': '$events'},
             # connect wit events
             {
-              '$lookup': {
-                  'from': 'events',
-                  'localField': 'events',
-                  'foreignField': '_id',
-                  'as': 'event'
-              }
+                '$lookup': {
+                    'from': 'events',
+                    'localField': 'events',
+                    'foreignField': '_id',
+                    'as': 'event'
+                }
             },
             {'$unwind': '$event'},
             {'$unwind': '$event.tickets'},
-            # {'$group': {
-            #
-            #     "number_of_events": {"$sum": 1},
-            #     "number_of_booked_tickets": {
-            #         "$sum": {
-            #             "$cond": [{"$eq": ["$tickets.status", "booked"]}, 1, 0]
-            #         }
-            #     },
-            # }}
-
-
-            # {'$unwind', '$ticket'},
-            # {
-            #     "$lookup": {
-            #         "from": "EventArtist",
-            #         "localField": "_id",
-            #         "foreignField": "right_id",
-            #         "as": "event_artist"
-            #     }
-            # },
-            # {
-            #     "$unwind": "$event_artist"
-            # },
-            # {
-            #     "$lookup": {
-            #         "from": "Event",
-            #         "localField": "event_artist.left_id",
-            #         "foreignField": "_id",
-            #         "as": "event"
-            #     }
-            # },
-            # {
-            #     "$unwind": "$event"
-            # },
-            # {
-            #     "$lookup": {
-            #         "from": "Ticket",
-            #         "localField": "event._id",
-            #         "foreignField": "event_id",
-            #         "as": "ticket"
-            #     }
-            # },
-            # {
-            #     "$group": {
-            #         "_id": "$_id",
-            #         "first_name": {"$first": "$first_name"},
-            #         "number_of_events": {"$sum": 1},
-            #         "number_of_booked_tickets": {
-            #             "$sum": {
-            #                 "$cond": [{"$eq": ["$ticket.status", "booked"]}, 1, 0]
-            #             }
-            #         },
-            #         "number_of_cancelled_tickets": {
-            #             "$sum": {
-            #                 "$cond": [{"$eq": ["$ticket.status", "cancelled"]}, 1, 0]
-            #             }
-            #         }
-            #     }
-            # }
+            {'$group': {
+                '_id': '$_id',
+                'number_of_events': {'$sum': 1},
+                'number_of_booked_tickets': {
+                    '$sum': {
+                        '$cond': [{'$eq': ['$event.tickets.status', 'booked']}, 1, 0]
+                    }
+                },
+                'number_of_cancelled_tickets': {
+                    '$sum': {
+                        '$cond': [{'$eq': ['$event.tickets.status', 'cancelled']}, 1, 0]
+                    }
+                }
+                # ,
+                # 'first_name': '$first_name'
+            }}
         ]
 
         result = list(self.artists.aggregate(pipeline))
@@ -302,12 +259,11 @@ class MongoDatabase(backend.database.Database):
         data = result[0]
 
         return schemas.ArtistReport(
-            artist_name=data['name'],
+            artist_name=' ',
             number_of_events=data['number_of_events'],
             number_of_booked_tickets=data['number_of_booked_tickets'],
             number_of_cancelled_tickets=data['number_of_cancelled_tickets']
         )
-
 
     @property
     def events(self) -> pymongo.collection.Collection:
