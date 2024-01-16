@@ -18,7 +18,6 @@ with connection.session as session:
     db = get_database(session)
     venues = db.get_venues()
 
-selected_venue = st.selectbox(label='select venue: ', options=venues, format_func=lambda venue: venue.name)
 
 
 order_by_mapping = {
@@ -29,9 +28,9 @@ order_by_mapping = {
 cols = st.columns(2)
 
 with cols[0]:
-    sort = st.radio('Number Of Tickets Purchased: ', order_by_mapping.keys())
+    selected_venue = st.selectbox(label='filter by venue: ', options=venues, format_func=lambda venue: venue.name)
 with cols[1]:
-    month = st.slider('last n months: ', min_value=1, max_value=12)
+    sort = st.radio('Number Of Tickets Purchased: ', order_by_mapping.keys())
 
 
 with connection.session as session:
@@ -40,8 +39,10 @@ with connection.session as session:
 
 
 for report in reports:
-    report_columns = st.columns(2)
+    report_columns = st.columns(3)
     with report_columns[0]:
         st.write(report.user.first_name + " " + report.user.last_name)
     with report_columns[1]:
+        st.write(report.user.email)
+    with report_columns[2]:
         st.write(report.tickets_purchased)
