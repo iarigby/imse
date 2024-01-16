@@ -120,10 +120,11 @@ class SqlDatabase(backend.database.Database):
         self.db.commit()
         return event_artist
 
-
-    def add_artist(self, artist: schemas.NewArtist):
-        self.db.add(models.Artist(**artist.model_dump()))
+    def add_artist(self, artist: schemas.NewArtist) -> schemas.Artist:
+        new_artist = models.Artist(**artist.model_dump())
+        self.db.add(new_artist)
         self.db.commit()
+        return schemas.Artist.model_validate(new_artist)
 
     def get_artists(self) -> list[schemas.Artist]:
         return [schemas.Artist.model_validate(t) for t in self.db.query(models.Artist).all()]
@@ -131,8 +132,7 @@ class SqlDatabase(backend.database.Database):
     def get_artist(self, artist_id: str) -> schemas.Artist:
         artist = (self.db.query(models.Artist)
                   .filter_by(_id=artist_id)
-                  .join(models.Venue, isouter=True)
-                  .join(models.Ticket, isouter=True)
+                  .join(models.EventArtist, isouter=True)
                   .one_or_none())
         return schemas.Artist.model_validate(artist)
 

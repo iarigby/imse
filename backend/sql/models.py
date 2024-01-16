@@ -47,6 +47,7 @@ class Ticket(Base):
         ),
     )
 
+
 class Venue(Base):
     __tablename__ = "venue"
     _id: Mapped[uuid.UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
@@ -92,3 +93,7 @@ class Artist(Base):
     last_name: Mapped[str] = mapped_column(nullable=False)
     stage_name: Mapped[str] = mapped_column(nullable=False)
     events: Mapped[List["Event"]] = relationship(secondary=EventArtist, back_populates="artists")
+
+    @property
+    def id(self):
+        return self._id
