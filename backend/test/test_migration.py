@@ -50,8 +50,8 @@ def test_migration():
             [(str(r.user.id), r.tickets_purchased) for r in sorted(migrated_report, key=lambda r: r.user.id)])
 
     assert len(migrated_user_tickets) != 0
-    assert (sorted(user_ticket.ticket.id for user_ticket in user_tickets) == sorted(
-        user_ticket.ticket.id for user_ticket in migrated_user_tickets))
+    assert (sorted(user_ticket.ticket.event_id for user_ticket in user_tickets) == sorted(
+        user_ticket.ticket.event_id for user_ticket in migrated_user_tickets))
     assert len(users) == len(migrated_users)
     assert len(venues) == len(migrated_venues)
     assert len(events) == len(migrated_events)

@@ -10,10 +10,10 @@ from backend.sql import models
 
 
 def check_object_id(value):
-    if _ObjectId.is_valid(value):
-        return str(value)
     if type(value) == uuid.UUID or type(value) == str:
         return value
+    if _ObjectId.is_valid(value):
+        return str(value)
     return value.id
 
 
@@ -71,7 +71,7 @@ class Ticket(NewTicket):
         if type(data) == models.Ticket:
             return data
         if '_id' not in data:
-            for foreign_key in ['user_id', 'venue_id']:
+            for foreign_key in ['user_id', 'venue_id', 'event_id']:
                 if foreign_key in data and type(data[foreign_key]) != str:
                     data[foreign_key] = str(data[foreign_key])
             data['_id'] = data['event_id'] + data['user_id']

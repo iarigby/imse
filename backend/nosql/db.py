@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import uuid
 from contextlib import contextmanager
 from typing import Dict, Any
 
@@ -15,7 +16,10 @@ from backend import schemas
 
 def to_object_id(item_id: str | ObjectId):
     if type(item_id) == str:
-        return ObjectId(item_id)
+        if ObjectId.is_valid(item_id):
+            return ObjectId(item_id)
+        else:
+            return uuid.UUID(item_id)
     return item_id
 
 
@@ -117,7 +121,7 @@ class MongoDatabase(backend.database.Database):
 
     def add_ticket(self, ticket: schemas.NewTicket) -> schemas.Ticket:
         ticket_dict = ticket.model_dump(by_alias=True)
-        ticket_dict['user_id'] = ObjectId(str(ticket_dict['user_id']))
+        ticket_dict['user_id'] = to_object_id(str(ticket_dict['user_id']))
         self.events.update_one({
             '_id': to_object_id(ticket.event_id)},
             {'$push': {'tickets': ticket_dict}
@@ -134,7 +138,7 @@ class MongoDatabase(backend.database.Database):
 
     def return_ticket(self, user_id, event_id):
         self.events.update_one(
-            {'_id': event_id, 'tickets.user_id': user_id},
+            {'_id': to_object_id(event_id), 'tickets.user_id': to_object_id(user_id)},
             {'$set': {'tickets.$.status': 'cancelled'}}
         )
         return
