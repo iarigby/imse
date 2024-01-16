@@ -47,6 +47,7 @@ services:
     environment:
       - "SQLALCHEMY_DATABASE_URL=postgresql://postgres:postgres@postgres_server/backend"
       - "REDIS_HOST=redis"
+      - "MONGO_HOST=mongodb"
     ports:
       - 8501:8501
     depends_on:
