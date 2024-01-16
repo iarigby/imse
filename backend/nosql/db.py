@@ -50,14 +50,17 @@ class MongoDatabase(backend.database.Database):
         user_id = self.users.insert_one(user.model_dump(by_alias=True)).inserted_id
         return schemas.User.model_validate(self.get_user(user_id))
 
-    def add_artist(self, artist: schemas.NewArtist):
+    def add_artist(self, artist: schemas.NewArtist) -> schemas.Artist:
+        artist_id = self.artists.insert_one(artist.model_dump(by_alias=True)).inserted_id
+        return schemas.Artist.model_validate(self.get_artist(artist_id))
         pass
 
     def get_artist(self, artist_id: str) -> schemas.Artist:
-        pass
+        artist = self.artists.find_one({'_id': to_object_id(artist_id)})
+        return schemas.Artist.model_validate(artist)
 
     def get_artists(self):
-        pass
+        return [schemas.Artist.model_validate(artist) for artist in self.artists.find()]
 
     def get_events(self):
         return [schemas.Event.model_validate(event) for event in self.events.find()]
@@ -135,7 +138,18 @@ class MongoDatabase(backend.database.Database):
              })
 
     def increase_user_balance(self, user_id: str, amount: int):
-        pass
+        self.users.update_one({
+            '_id': to_object_id(user_id)},
+            {'$inc': {'balance': amount}
+             })
+
+    def return_ticket(self, user_id, event_id):
+        self.tickets.update_one(
+            {'user_id': user_id, 'event_id': event_id},
+            {'$set': {'status': 'cancelled'}}
+        )
+        return
+
 
     def get_events_with_tickets(self) -> list[schemas.Event]:
         pass
@@ -198,6 +212,11 @@ class MongoDatabase(backend.database.Database):
     @property
     def users(self) -> pymongo.collection.Collection:
         return self.client.imse.users
+
+    @property
+    def tickets(self) -> pymongo.collection.Collection:
+        return self.client.imse.tickets
+
 
     @property
     def artists(self) -> pymongo.collection.Collection:
