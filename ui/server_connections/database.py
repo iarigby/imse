@@ -70,10 +70,10 @@ def switch_database():
 def current_database():
     if Keys.session_db_key not in st.session_state:
         set_database(os.environ.get(Keys.session_db_key, Keys.db_sql))
+        st.rerun()
     return st.session_state[Keys.session_db_key]
 
 
 def set_database(val: str):
     os.environ[Keys.session_db_key] = val
     st.session_state[Keys.session_db_key] = val
-    st.rerun()

@@ -59,6 +59,12 @@ class MongoDatabase(backend.database.Database):
     def get_artists(self):
         pass
 
+    def get_artist_info(self, artist_id: str) -> schemas.Artist:
+        pass
+
+    def add_artist_to_event(self, artist_id: str, event_id: str):
+        pass
+
     def get_events(self):
         return [schemas.Event.model_validate(event) for event in self.events.find()]
 
