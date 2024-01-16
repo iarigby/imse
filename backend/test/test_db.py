@@ -43,6 +43,21 @@ def test_add_user(db_session):
     "db_session",
     [with_sql,
      pytest.param(with_mongo, marks=pytest.mark.integration)])
+def test_add_get_artist(db_session):
+    with db_session() as db:
+        venue = db.add_venue(generate.venue())
+        event = db.add_event(generate.event(venue.id))
+        artist = db.add_artist(generate.artist())
+        assert artist == db.get_artist(artist.id)
+        db.add_artist_to_event(artist.id, event.id)
+        assert db.get_artist(artist.id).events == [event.id]
+        assert db.get_event(event.id).artists == [artist.id]
+
+
+@pytest.mark.parametrize(
+    "db_session",
+    [with_sql,
+     pytest.param(with_mongo, marks=pytest.mark.integration)])
 def test_buy_ticket(db_session):
     with db_session() as db:
         service = services.EventService(db)
