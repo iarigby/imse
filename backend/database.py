@@ -49,7 +49,7 @@ class Database(ABC):
         pass
 
     @abstractmethod
-    def get_artist_info(self, artist_id: str) -> schemas.Artist:
+    def get_artist_info(self, artist_id: str) -> schemas.ArtistReport:
         pass
 
     @abstractmethod

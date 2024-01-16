@@ -71,3 +71,6 @@ def populate_database(db: Database, config: Config = default_config):
         for i in range(random.randint(0, config.events)):
             db.add_artist_to_event(artist.id, events[i].id)
 
+    for event in events:
+        for i in range(random.randint(0, 3)):
+            db.add_artist_to_event(random.choice(artists).id, event.id)
