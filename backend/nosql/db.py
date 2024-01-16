@@ -221,85 +221,93 @@ class MongoDatabase(backend.database.Database):
 
         return [create_response(co) for co in cursor]
 
-    def get_artist_info(self, artist_id: str) -> dict[str, str | Any] | None:
+    def get_artist_info(self, artist_id: str) -> schemas.ArtistReport:
         pipeline = [
+            {"$match": {"_id": to_object_id(artist_id)}},
+            {'$unwind': '$events'},
+            # connect wit events
             {
-                "$match": {"_id": ObjectId(artist_id)}
+              '$lookup': {
+                  'from': 'events',
+                  'localField': 'events',
+                  'foreignField': '_id',
+                  'as': 'event'
+              }
             },
-            {
-                "$lookup": {
-                    "from": "EventArtist",
-                    "localField": "_id",
-                    "foreignField": "right_id",
-                    "as": "event_artist"
-                }
-            },
-            {
-                "$unwind": "$event_artist"
-            },
-            {
-                "$lookup": {
-                    "from": "Event",
-                    "localField": "event_artist.left_id",
-                    "foreignField": "_id",
-                    "as": "event"
-                }
-            },
-            {
-                "$unwind": "$event"
-            },
-            {
-                "$lookup": {
-                    "from": "Ticket",
-                    "localField": "event._id",
-                    "foreignField": "event_id",
-                    "as": "ticket"
-                }
-            },
-            {
-                "$group": {
-                    "_id": "$_id",
-                    "first_name": {"$first": "$first_name"},
-                    "number_of_events": {"$sum": 1},
-                    "number_of_booked_tickets": {
-                        "$sum": {
-                            "$cond": [{"$eq": ["$ticket.status", "booked"]}, 1, 0]
-                        }
-                    },
-                    "number_of_cancelled_tickets": {
-                        "$sum": {
-                            "$cond": [{"$eq": ["$ticket.status", "cancelled"]}, 1, 0]
-                        }
-                    }
-                }
-            }
+            {'$unwind': '$event'},
+            {'$unwind': '$event.tickets'},
+            # {'$group': {
+            #
+            #     "number_of_events": {"$sum": 1},
+            #     "number_of_booked_tickets": {
+            #         "$sum": {
+            #             "$cond": [{"$eq": ["$tickets.status", "booked"]}, 1, 0]
+            #         }
+            #     },
+            # }}
+
+
+            # {'$unwind', '$ticket'},
+            # {
+            #     "$lookup": {
+            #         "from": "EventArtist",
+            #         "localField": "_id",
+            #         "foreignField": "right_id",
+            #         "as": "event_artist"
+            #     }
+            # },
+            # {
+            #     "$unwind": "$event_artist"
+            # },
+            # {
+            #     "$lookup": {
+            #         "from": "Event",
+            #         "localField": "event_artist.left_id",
+            #         "foreignField": "_id",
+            #         "as": "event"
+            #     }
+            # },
+            # {
+            #     "$unwind": "$event"
+            # },
+            # {
+            #     "$lookup": {
+            #         "from": "Ticket",
+            #         "localField": "event._id",
+            #         "foreignField": "event_id",
+            #         "as": "ticket"
+            #     }
+            # },
+            # {
+            #     "$group": {
+            #         "_id": "$_id",
+            #         "first_name": {"$first": "$first_name"},
+            #         "number_of_events": {"$sum": 1},
+            #         "number_of_booked_tickets": {
+            #             "$sum": {
+            #                 "$cond": [{"$eq": ["$ticket.status", "booked"]}, 1, 0]
+            #             }
+            #         },
+            #         "number_of_cancelled_tickets": {
+            #             "$sum": {
+            #                 "$cond": [{"$eq": ["$ticket.status", "cancelled"]}, 1, 0]
+            #             }
+            #         }
+            #     }
+            # }
         ]
 
-        result = schemas.Artist.aggregate(pipeline)
-        # return next(result, None)
+        result = list(self.artists.aggregate(pipeline))
 
-        def create_response(co):
-            artist_success = schemas.ArtistReport.model_validate(co['artist_success'])
-            co['artist_success'] = []
-            return schemas.ArtistReport(ticket=ticket,
-                                      event=schemas.Event.model_validate(co))
+        data = result[0]
 
-        return [create_response(co) for co in cursor]
+        return schemas.ArtistReport(
+            artist_name=data['name'],
+            number_of_events=data['number_of_events'],
+            number_of_booked_tickets=data['number_of_booked_tickets'],
+            number_of_cancelled_tickets=data['number_of_cancelled_tickets']
+        )
 
-        # Execute the aggregation pipeline
-        result = list(self.db.artists.aggregate(pipeline))
-
-        # Check if result is not empty and return a formatted response
-        if result:
-            data = result[0]
-            return {
-                'artist_id': str(data['_id']),  # Converting ObjectId back to string
-                'number_of_events': data['number_of_events'],
-                'number_of_booked_tickets': data['number_of_booked_tickets'],
-                'number_of_cancelled_tickets': data['number_of_cancelled_tickets']
-            }
-        else:
-            return None
 
     @property
     def events(self) -> pymongo.collection.Collection:
