@@ -19,7 +19,6 @@ with connection.session as session:
     venues = db.get_venues()
 
 
-
 order_by_mapping = {
     "Descending": OrderBy.Descending,
     "Ascending": OrderBy.Ascending
