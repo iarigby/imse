@@ -26,6 +26,7 @@ def test_migration():
 
         venues = sql_db.get_venues()
         events = sql_db.get_events()
+        artists = sql_db.get_artists()
         sql_service.buy_ticket(user.id, random.choice(events).id)
         sql_service.buy_ticket(user.id, random.choice(events).id)
 
@@ -37,6 +38,7 @@ def test_migration():
     migrated_events = mongo_db.get_events()
     migrated_venues = mongo_db.get_venues()
     migrated_tickets = mongo_db.get_tickets()
+    migrated_artists = mongo_db.get_artists()
     migrated_user = mongo_db.get_user(user.id)
     migrated_user_tickets = mongo_db.get_tickets_for_user(migrated_user.id)
     assert len(migrated_user_tickets) != 0
@@ -46,4 +48,12 @@ def test_migration():
     assert len(venues) == len(migrated_venues)
     assert len(events) == len(migrated_events)
     assert len(tickets) == len(migrated_tickets)
+    assert len(artists) == len(migrated_artists)
+
     assert sorted(user.id for user in users) == sorted(user.id for user in migrated_users)
+
+    def sort_by_id(li):
+        return sorted([e for e in li], key=lambda e: e.id)
+
+    assert ([len(a.events) for a in sort_by_id(artists)] ==
+            [len(a.events) for a in sort_by_id(migrated_artists)])
