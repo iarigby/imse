@@ -17,12 +17,17 @@ selected_artist = st.selectbox(label='selected artist: ', options= artists, form
 
 with connection.session as session:
     db = get_database(session)
-    artist_info = db.get_artist_info(selected_artist.id)
+    try:
+        artist_info = db.get_artist_info(selected_artist.id)
+    except AttributeError:
+        st.write("This artist has not performed in any event")
+        st.stop()
 
     report_columns = st.columns(3)
     # with report_columns[0]:
     #     st.subheader("Name")
     #     st.write(artist_info.artist_name)
+
     with report_columns[0]:
         st.subheader("Events")
         st.write(artist_info.number_of_events)
