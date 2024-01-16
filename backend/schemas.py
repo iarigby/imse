@@ -40,6 +40,11 @@ class VenueReport(BaseModel):
     user: User
     tickets_purchased: int
 
+class ArtistReport(BaseModel):
+    artist_name: str
+    number_of_events: int
+    number_of_booked_tickets: int
+    number_of_cancelled_tickets: int
 
 class NewTicket(ORMModel):
     purchase_date: datetime.datetime

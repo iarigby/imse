@@ -88,5 +88,7 @@ class Event(Base):
 class Artist(Base):
     __tablename__ = "artist"
     _id: Mapped[uuid.UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
-    name: Mapped[str] = mapped_column(nullable=False)
+    first_name: Mapped[str] = mapped_column(nullable=False)
+    last_name: Mapped[str] = mapped_column(nullable=False)
+    stage_name: Mapped[str] = mapped_column(nullable=False)
     events: Mapped[List["Event"]] = relationship(secondary=EventArtist, back_populates="artists")

@@ -4,7 +4,7 @@ import os
 from contextlib import contextmanager
 from typing import Type
 
-from sqlalchemy import create_engine, StaticPool  # func, select, text
+from sqlalchemy import create_engine, StaticPool, func  # func, select, text
 from sqlalchemy.orm import sessionmaker, Session
 
 import backend.database
@@ -114,8 +114,15 @@ class SqlDatabase(backend.database.Database):
         self.db.commit()
         return schemas.Event.model_validate(db_event)
 
+    def add_artist_to_event(self, artist_id: str, event_id: str) -> models.EventArtist:
+        event_artist = models.EventArtist.insert().values(left_id=event_id, right_id=artist_id)
+        self.db.execute(event_artist)
+        self.db.commit()
+        return event_artist
+
+
     def add_artist(self, artist: schemas.NewArtist):
-        self.db.add(models.Ticket(**artist.model_dump()))
+        self.db.add(models.Artist(**artist.model_dump()))
         self.db.commit()
 
     def get_artists(self) -> list[schemas.Artist]:
@@ -184,3 +191,31 @@ class SqlDatabase(backend.database.Database):
                                     tickets_purchased=len(user.tickets)
                                     ) for user in users]
 
+    def get_artist_info(self, artist_id: str) -> schemas.ArtistReport:
+        # Joining Artist, EventArtist, Event, and Ticket tables
+        query = self.db.query(
+            models.Artist.first_name.label('first_name'),
+            func.count(models.Event._id).label('number_of_events'),
+            func.count(func.nullif(models.Ticket.status, 'cancelled')).label('number_of_booked_tickets'),
+            func.count(func.nullif(models.Ticket.status, 'booked')).label('number_of_cancelled_tickets')
+        ).join(
+            models.EventArtist, models.Artist._id == models.EventArtist.c.right_id
+        ).join(
+            models.Event, models.EventArtist.c.left_id == models.Event._id
+        ).join(
+            models.Ticket, models.Ticket.event_id == models.Event._id
+        ).filter(
+            models.Artist._id == artist_id
+        ).group_by(
+            models.Artist.first_name
+        )
+
+        # Execute the query
+        result = query.one_or_none()
+
+        # Return the result
+        return schemas.ArtistReport(artist_name=result.first_name,
+                                    number_of_events=result.number_of_events,
+                                    number_of_booked_tickets=result.number_of_booked_tickets,
+                                    number_of_cancelled_tickets=result.number_of_cancelled_tickets
+                                    )

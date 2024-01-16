@@ -35,13 +35,20 @@ def populate_database(db: Database, config: Config = default_config):
     admin_user.balance = 200
     db.add_user(admin_user)
     db.add_user(fixed_user1)
+
     for user in range(config.users):
         db.add_user(generate.user())
+
     for venue in range(config.venues):
         db.add_venue(generate.venue())
+
+    for artist in range(config.artists):
+        db.add_artist(generate.artist())
+
     venues = db.get_venues()
     users = db.get_users()
     service = services.EventService(db)
+
     for venue in venues:
         for event_i in range(config.events):
             event = db.add_event(generate.event(venue.id))
@@ -54,3 +61,11 @@ def populate_database(db: Database, config: Config = default_config):
                     pass
                 except services.UserAlreadyHasTicket:
                     pass
+
+    artists = db.get_artists()
+    events = db.get_events()
+
+    for artist in artists:
+        for i in range(random.randint(0, config.events)):
+            db.add_artist_to_event(artist.id, events[i].id)
+
