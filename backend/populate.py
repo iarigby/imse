@@ -34,7 +34,7 @@ def populate_database(db: Database, config: Config = default_config):
     admin_user.last_name = "admin"
     admin_user.balance = 200
     db.add_user(admin_user)
-    db.add_user(fixed_user1)
+    fixed_user1_id = db.add_user(fixed_user1).id
 
     for user in range(config.users):
         db.add_user(generate.user())
@@ -61,6 +61,8 @@ def populate_database(db: Database, config: Config = default_config):
                     pass
                 except services.UserAlreadyHasTicket:
                     pass
+
+    db.increase_user_balance(fixed_user1_id, 200)
 
     artists = db.get_artists()
     events = db.get_events()

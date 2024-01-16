@@ -6,7 +6,12 @@ from ui.server_connections.database import get_database
 
 
 connection = database.init_db_and_get_connection()
-authentication.authorize(connection)
+current_user_email = authentication.authorize(connection)
+
+
+if current_user_email != 'admin':
+    st.write("Only admins can access this page")
+    st.stop()
 
 
 with connection.session as session:
@@ -32,12 +37,6 @@ with cols[1]:
 with connection.session as session:
     db = get_database(session)
     reports = db.get_top_users_for_venue(selected_venue.id, order_by_mapping[sort])
-
-
-if sort == "Ascending":
-    reports = sorted(reports, key=lambda r: r.tickets_purchased)
-else:
-    reports = sorted(reports, key=lambda r: r.tickets_purchased, reverse=True)
 
 
 for report in reports:

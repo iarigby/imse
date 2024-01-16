@@ -1,7 +1,7 @@
 import contextlib
-from typing import ContextManager
+from typing import ContextManager, Callable
 
-from backend import generate, services, schemas
+from backend import generate, services, schemas, database
 from backend.database import OrderBy
 import pytest
 
@@ -65,9 +65,9 @@ def test_buy_ticket(db_session):
 
 @pytest.mark.parametrize(
     "db_session",
-    [with_sql,
+    [pytest.param(with_sql, marks=pytest.mark.integration),
      pytest.param(with_mongo, marks=pytest.mark.integration)])
-def test_get_top_users_for_venue(db_session):
+def test_get_top_users_for_venue(db_session: Callable[[], ContextManager[database.Database]]):
     with db_session() as db:
         service = services.EventService(db)
         user1 = db.add_user(generate.user(balance=1000))
@@ -83,18 +83,22 @@ def test_get_top_users_for_venue(db_session):
         service.buy_ticket(user2.id, event1.id)
         service.buy_ticket(user2.id, event3.id)
         reports1 = db.get_top_users_for_venue(venue1.id, OrderBy.Ascending)
+        reports1_desc = db.get_top_users_for_venue(venue1.id, OrderBy.Descending)
+
         reports2 = db.get_top_users_for_venue(venue2.id, OrderBy.Ascending)
         assert len(reports1) == 2
         assert len(reports2) == 1
-    # assert reports1 == sorted(reports1, key=lambda r: r.tickets_purchased, reverse=True)
+
+    assert reports1 == sorted(reports1, key=lambda r: r.tickets_purchased)
+    assert reports1_desc == sorted(reports1_desc, key=lambda r: r.tickets_purchased, reverse=True)
 
     def find_user(reports, user_id) -> schemas.VenueReport:
         return next(report for report in reports if report.user.id == user_id)
 
     assert find_user(reports1, user1.id).tickets_purchased == 2
-    if db_session.__name__ != with_sql.__name__:
-        assert find_user(reports1, user2.id).tickets_purchased == 1
-        assert find_user(reports2, user2.id).tickets_purchased == 1
+
+    assert find_user(reports1, user2.id).tickets_purchased == 1
+    assert find_user(reports2, user2.id).tickets_purchased == 1
 
     with pytest.raises(StopIteration):
         find_user(reports1, user3.id)

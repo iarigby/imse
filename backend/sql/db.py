@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import os
+import uuid
 from contextlib import contextmanager
-from typing import Type
 
-from sqlalchemy import create_engine, StaticPool, func  # func, select, text
+from sqlalchemy import create_engine, StaticPool, func, text
 from sqlalchemy.orm import sessionmaker, Session
 
 import backend.database
@@ -166,30 +166,35 @@ class SqlDatabase(backend.database.Database):
 
     # need to add date
     def get_top_users_for_venue(self, venue_id, order_by: OrderBy) -> list[schemas.VenueReport]:
-        # match order_by:
-        #     case OrderBy.Ascending:
-        #         order = 'ASC'
-        #     case _:
-        #         order = 'DESC'
-        # stmt = (select(models.User, func.count(models.User.tickets).label('ticket_count'))
-        #         .join(models.Ticket)
-        #         .join(models.Event)
-        #         .filter(models.Event.venue_id == venue_id)
-        #         .order_by(text('ticket_count ' + order))
-        #         .group_by(models.User))
-        #
-        # stmt = self.db.execute(stmt)
-        # return [schemas.VenueReport(user=schemas.User.model_validate(user),
-        #                             tickets_purchased=ticket_count
-        #                             ) for [user, ticket_count] in stmt]
-        users: list[Type[models.User]] = (self.db.query(models.User)
-                                          .join(models.Ticket)
-                                          .join(models.Event)
-                                          .filter_by(venue_id=venue_id)
-                                          .all())
-        return [schemas.VenueReport(user=schemas.User.model_validate(user),
-                                    tickets_purchased=len(user.tickets)
-                                    ) for user in users]
+        order_by_mapping = {
+            order_by.Ascending: 'ASC',
+            order_by.Descending: 'DESC'
+        }
+        stmt = text(f"""select "user", count(*) from "user"
+        join public.ticket t on "user"._id = t.user_id
+        join public.event e on e._id = t.event_id
+        join public.venue v on v._id = e.venue_id
+                                where v._id = '{venue_id}'
+        group by "user"._id
+        order by count(*) {order_by_mapping[order_by]}
+                """)
+
+        users_with_counts = self.db.execute(stmt)
+
+        def query_result_to_user(user_csv, ticket_count) -> schemas.VenueReport:
+            user_fields = user_csv.replace('(', '').replace(')', '').split(',')
+            user = schemas.User(
+                _id=uuid.UUID(user_fields[0]),
+                first_name=user_fields[1],
+                last_name=user_fields[2],
+                email=user_fields[3],
+                password=user_fields[4],
+                role=user_fields[5],
+                profile_visibility=user_fields[6],
+                balance=int(user_fields[7])
+            )
+            return schemas.VenueReport(user=user, tickets_purchased=ticket_count)
+        return [query_result_to_user(user, tickets_purchased) for user, tickets_purchased in users_with_counts]
 
     def get_artist_info(self, artist_id: str) -> schemas.ArtistReport:
         # Joining Artist, EventArtist, Event, and Ticket tables
