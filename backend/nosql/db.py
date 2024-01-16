@@ -194,6 +194,9 @@ class MongoDatabase(backend.database.Database):
     def add_events(self, events: list[schemas.Event]):
         self.events.insert_many([event.model_dump(by_alias=True) for event in events])
 
+    def add_artists(self, artists: list[schemas.Artist]):
+        self.artists.insert_many([artist.model_dump(by_alias=True) for artist in artists])
+
     def get_tickets_for_user(self, user_id) -> list[schemas.UserTicket]:
         connect_with_user = {
             '$lookup': {
