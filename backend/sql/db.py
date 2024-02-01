@@ -4,7 +4,7 @@ import os
 import uuid
 from contextlib import contextmanager
 
-from sqlalchemy import create_engine, StaticPool, func, text
+from sqlalchemy import create_engine, StaticPool, func, text, distinct
 from sqlalchemy.orm import sessionmaker, Session
 
 import backend.database
@@ -200,7 +200,7 @@ class SqlDatabase(backend.database.Database):
         # Joining Artist, EventArtist, Event, and Ticket tables
         query = self.db.query(
             models.Artist.first_name.label('first_name'),
-            func.count(models.Event._id).label('number_of_events'),
+            func.count(distinct(models.Event._id)).label('number_of_events'),
             func.count(func.nullif(models.Ticket.status, 'cancelled')).label('number_of_booked_tickets'),
             func.count(func.nullif(models.Ticket.status, 'booked')).label('number_of_cancelled_tickets')
         ).join(

@@ -13,7 +13,7 @@ with connection.session as session:
     venues = db.get_venues()
     artists = db.get_artists()
 
-selected_artist = st.selectbox(label='selected artist: ', options= artists, format_func=lambda  artist: artist.first_name)
+selected_artist = st.selectbox(label='selected artist: ', options= artists, format_func=lambda  artist: artist.stage_name)
 
 with connection.session as session:
     db = get_database(session)
@@ -24,9 +24,6 @@ with connection.session as session:
         st.stop()
 
     report_columns = st.columns(3)
-    # with report_columns[0]:
-    #     st.subheader("Name")
-    #     st.write(artist_info.artist_name)
 
     with report_columns[0]:
         st.subheader("Events")

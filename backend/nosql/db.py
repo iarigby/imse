@@ -238,7 +238,7 @@ class MongoDatabase(backend.database.Database):
             {'$unwind': '$event.tickets'},
             {'$group': {
                 '_id': '$_id',
-                'number_of_events': {'$sum': 1},
+                'distinct_event_ids': {'$addToSet': '$event._id'},
                 'number_of_booked_tickets': {
                     '$sum': {
                         '$cond': [{'$eq': ['$event.tickets.status', 'booked']}, 1, 0]
@@ -249,8 +249,12 @@ class MongoDatabase(backend.database.Database):
                         '$cond': [{'$eq': ['$event.tickets.status', 'cancelled']}, 1, 0]
                     }
                 }
-                # ,
-                # 'first_name': '$first_name'
+            }},
+            {'$addFields': {
+                'number_of_events': {'$size': '$distinct_event_ids'}
+            }},
+            {'$project': {
+                'distinct_event_ids': 0  # Optionally remove the distinct_event_ids from the final output
             }}
         ]
 
